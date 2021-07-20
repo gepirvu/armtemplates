@@ -26,18 +26,6 @@
             "metadata": {
                 "description": "Database Tier correspondend scaling options"
             }
-        },
-        "location": {
-            "type": "string",
-            "metadata": {
-                "description": "description"
-            }
-        },
-        "storageSku": {
-            "type": "string",
-            "metadata": {
-                "description": "description"
-            }
         }
     },
     "functions": [],
@@ -46,12 +34,12 @@
         /*{
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
-            "name": "lkTemplSharedAdf",
+            "name": "lkTemplSharedRes",
             "resourceGroup": "shared-we-devtest-rsg",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/sharedRes/adf/azuredeploy.json')]",
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/sharedRes/main.json')]",
                     //"relativePath":"./arm-modules/adf/azuredeploy.json",
                     "contentVersion": "1.0.0.0"
                 },
@@ -85,37 +73,34 @@
                         "value": "[parameters('dataProduct')]"
                     },
                     "adlsConnectionstring": {
-                        "value": "[reference('lkTemplAdls').outputs.storageAccountConnectionString.value]"
+                        "value": "[reference('lkTemplDls').outputs.storageAccountConnectionString.value]"
                     },
                     "akvUrl": {
-                        "value": "[reference('lkTemplAkv').outputs.akvUrl.value]"
+                        "value": "[reference('lkTemplKv').outputs.akvUrl.value]"
                     },
                     "aSqlSecretName": {
                         "value": "[reference('lkTemplAsql').outputs.asqlSecretName.value]"
                     },
                     "sharedIrResourceId": {
-                        "value": "/subscriptions/5cdc739b-d22b-4b07-9e04-1ef854a3b4a6/resourceGroups/rsg-dpshared-np-001/providers/Microsoft.DataFactory/factories/adf-dp-np-001" //TEST
+                        "value": "" //TEST
                     },
                     "linkedIRFlag": {
-                        "value": false // TODO: Fill in parameter value
+                        "value": false 
                     },
                     "linkedServiceFlag": {
-                        "value": true // TODO: Fill in parameter value
-                    },
-                    "selfHostedIRFlag": {
-                        "value": false // TODO: Fill in parameter value
+                        "value": true 
                     }
                 }
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'lkTemplAsql')]",
-                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdls')]"
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplDls')]"
             ]
         },
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
-            "name": "lkTemplAdls",
+            "name": "lkTemplDls",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -148,29 +133,44 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "builtInRoleType": {
+                    "builtInRoleTypeDF": {
                         "value": "StorageBlobDataContributor"
                     },
-                    "principalId": {
+                    "dataFactoryPrincipalId": {
                         "value": "[reference('lkTemplAdf').outputs.dataFactoryPrincipalId.value]" 
                     },
+                    "dataFactoryName": {
+                        "value": "[reference('lkTemplAdf').outputs.dataFactoryName.value]"
+                    },
                     "storageName": {
-                        "value": "[reference('lkTemplAdls').outputs.storageName.value]"
+                        "value": "[reference('lkTemplDls').outputs.storageName.value]"
                     },
                     "keyVaultName": {
-                        "value": "[reference('lkTemplAkv').outputs.keyVaultName.value]"
+                        "value": "[reference('lkTemplKv').outputs.keyVaultName.value]"
+                    },
+                     "builtInRoleTypeSyn": {
+                        "value": "StorageBlobDataContributor"
+                    },
+                    "synapsePrincipalId": {
+                        "value": "[reference('lkTemplSyn').outputs.synapsePrincipalId.value]"
+                    },
+                    "synapseWorkspaceName": {
+                        "value": "[reference('lkTemplSyn').outputs.synapseWorkSpaceName.value]"
+                    },
+                    "builtInRoleTypeUser": {
+                        "value": "StorageBlobDataContributor"
                     }
-                     
                 }
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdf')]"
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdf')]",
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplSyn')]"
             ]
         },
          {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
-            "name": "lkTemplAkv",
+            "name": "lkTemplKv",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -214,13 +214,59 @@
                         "value": "[parameters('dataProduct')]"
                     },
                     "keyVaultName": {
-                        "value": "[reference('lkTemplAkv').outputs.keyVaultName.value]"
+                        "value": "[reference('lkTemplKv').outputs.keyVaultName.value]"
                     }
                 }
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAkv')]"
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplKv')]"
             ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "lkTemplSyn",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/syn/azuredeploy.json')]",
+                    //"relativePath":"./arm-modules/syn/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "allowAllConnections": {
+                        "value": true
+                    },
+                    "environment": {
+                        "value": "[parameters('environment')]"
+                    },
+                    "sparkDeployment": {
+                        "value": true
+                    },
+                    "dlsDeployment": {
+                        "value": false
+                    },
+                    "sqlPoolDeployment": {
+                        "value": false
+                    },
+                    "keyVaultName": {
+                        "value": "[reference('lkTemplKv').outputs.keyVaultName.value]"
+                    },
+                    "dlsAccountUrl":{
+                        "value": "[reference('lkTemplDls').outputs.storageAccountConnectionString.value]"
+                    },
+                    "dataProduct": {
+                        "value": "[parameters('dataProduct')]"
+                    },
+                    "dlsFsName": {
+                        "value": "[reference('lkTemplDls').outputs.dlsFsName.value]"
+                    }
+                },
+                "dependsOn": [
+                    "[resourceId('Microsoft.Resources/deployments', 'lkTemplDls')]",
+                    "[resourceId('Microsoft.Resources/deployments', 'lkTemplKv')]"
+                ]
+            }
         }
     ],
     "outputs": {}

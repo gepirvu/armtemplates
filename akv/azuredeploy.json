@@ -36,9 +36,9 @@
         },
           "environment": {
             "type": "string",
-            "defaultValue": "dev",
+            "defaultValue": "d",
             "metadata": {
-                "description":"Location for all services"
+                "description":"Development environment"
             }
         },
         "location": {
@@ -54,7 +54,7 @@
                 "description": "Use Case name"
             }
         },
-        "servicePrincipalObjects": {
+        "userObjectId": {
             "type": "array",
             "defaultValue": [
                 {
@@ -75,12 +75,12 @@
                 }
             ],
             "metadata": {
-                "description": "Service Principals Objects with permissions."
+                "description": "User principals Objects with permissions."
             }
         }
     },
     "variables": {
-        "keyVaultName": "[toLower(concat('akv-',parameters('environment'),'-',parameters('dataProduct')))]"
+        "keyVaultName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]"
     },
     "resources": [
     {
@@ -96,11 +96,11 @@
               "copy": [
                     {
                         "name": "accessPolicies",
-                        "count": "[length(parameters('servicePrincipalObjects'))]",
+                        "count": "[length(parameters('userObjectId'))]",
                         "input": {
                             "tenantId": "[subscription().tenantId]",
-                            "objectId": "[parameters('servicePrincipalObjects')[copyIndex('accessPolicies')].Id]",
-                            "permissions": "[parameters('servicePrincipalObjects')[copyIndex('accessPolicies')].Permissions]"
+                            "objectId": "[parameters('userObjectId')[copyIndex('accessPolicies')].Id]",
+                            "permissions": "[parameters('userObjectId')[copyIndex('accessPolicies')].Permissions]"
                         }
                     }
                 ],

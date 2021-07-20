@@ -127,7 +127,7 @@
      },
       "environment": {
             "type": "string",
-            "defaultValue": "dev",
+            "defaultValue": "d",
             "metadata": {
                 "description":"Location for all services"
             }

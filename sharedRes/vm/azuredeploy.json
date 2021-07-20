@@ -101,7 +101,7 @@
         },
         "environment": {
             "type": "string",
-            "defaultValue": "dev",
+            "defaultValue": "sh",
             "metadata": {
                 "description": "Location for all services"
             }
@@ -112,28 +112,15 @@
     },
     "functions": [],
     "variables": {
-        "locationInfo": {
-            "westeurope":{
-                "abbreviation": "we"
-            },
-            "northeurope":{
-                "abbreviation": "ne"
-            },
-            "uksouth":{
-                "abbreviation": "uks"
-            }
-        },
-      "region": "[variables('locationInfo')[parameters('location')].abbreviation]",
-      "virtualMachinemName": "[toLower(concat('shared-',parameters('dataProduct'),variables('region'),'-',if(equals(parameters('environment'),'prod'),'prod','devtest'),'-vm'))]",
-      "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]",
-      "nicName": "[concat(parameters('virtualMachineName'), 'Nic')]",
-      "networkSecurityGroupName": "default-NSG",
+      "storageAccountName": "[toLower(concat('debootdiags',parameters('environment'),'sacc'))]",
+      "nicName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-nic'))]",
+      "networkSecurityGroupName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-nsg'))]",
       "adminUsername": "vmadmin",
-      "adminPassword": "[concat('P', uniqueString(resourceGroup().id,deployment().name), 'x', '!')]",
+      "adminPassword": "[concat('P', uniqueString(resourceGroup().id,deployment().name,parameters('virtualMachineName')), 'x', '!')]",
       "publicIpAddressId": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
-      "publicIPAddressName": "[concat(parameters('virtualMachineName'), '-ip')]",
-      "snetName": "[concat('shared-',parameters('dataProduct'),'snet')]",
-      "vnetName": "[concat('shared-',parameters('dataProduct'),'vnet')]"
+      "publicIPAddressName": "[concat(parameters('virtualMachineName'), '-pip')]",
+      "snetName": "[concat(parameters('dataProduct'),'-sh','-snet')]",
+      "vnetName": "[concat(parameters('dataProduct'),'-sh','-vnet')]"
     },
     "resources": [
       {

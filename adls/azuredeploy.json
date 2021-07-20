@@ -24,7 +24,7 @@
         },
         "environment": {
             "type": "string",
-            "defaultValue":"dev",
+            "defaultValue":"d",
             "metadata": {
                 "description": "Development environment"
             }
@@ -37,7 +37,8 @@
         }
      },
     "variables": {
-        "storageAccountName": "[toLower(concat('sta',parameters('environment'),parameters('dataProduct'),uniqueString(resourceGroup().id)))]"
+        "storageAccountName": "[toLower(concat('de',parameters('dataProduct'),parameters('environment'),'dls'))]",
+        "dlsFsName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-fs')]"
     },
     "functions": [],
     "resources": [
@@ -51,20 +52,23 @@
                 "name": "[parameters('storageSku')]"
             },
             "properties": {
-                "encryption": {
-                    "keySource": "Microsoft.Storage",
-                    "services": {
-                        "blob": {
-                            "enabled": true
-                        },
-                        "file": {
-                            "enabled": true
-                        }
-                    }
-                },
+                "accessTier": "Hot",
                 "isHnsEnabled": true,
                 "supportsHttpsTrafficOnly": true
-            }
+            },
+            "resources": [
+                {
+                    "name": "[concat('default/',variables('dlsFsName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2019-06-01",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+                    ],
+                    "properties": {
+                        "publicAccess": "None"
+                    }
+                }
+            ]
         }
     ],
     "outputs": {
@@ -74,7 +78,11 @@
         },
          "storageAccountConnectionString": {
             "type": "string",
-            "value": "[concat('https://',variables('storageAccountName'),'.dfs.core.windows.net')]"
+            "value": "[reference(variables('storageAccountName')).primaryEndpoints.dfs]"     
+        },
+        "dlsFsName": {
+            "type": "string",
+            "value": "[variables('dlsFsName')]"
         }
     }
 }

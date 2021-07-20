@@ -4,7 +4,7 @@
     "parameters": {
             "environment": {
             "type": "string",
-            "defaultValue": "dev",
+            "defaultValue": "sh",
             "metadata": {
                 "description":"Location for all services"
             }
@@ -25,10 +25,8 @@
         "resourceTags": {
             "type": "object",
             "defaultValue": {
-                "environment": "[parameters('environment')]",
+                "environment": "devtest",
                 "dataproduct": "[parameters('dataProduct')]",
-                "costCenter": "finance",
-                "serviceOwner": "Giang",
                 "deployment": "ARM"
             }
         },
@@ -41,19 +39,7 @@
     },
     "functions": [],
     "variables": {
-        "locationInfo": {
-            "westeurope":{
-                "abbreviation": "we"
-            },
-            "northeurope":{
-                "abbreviation": "ne"
-            },
-            "uksouth":{
-                "abbreviation": "uks"
-            }
-        },
-        "region": "[variables('locationInfo')[parameters('location')].abbreviation]",
-        "dataFactoryName": "[toLower(concat('shared-',variables('region'),'-',if(equals(parameters('environment'),'prod'),'prod','devtest'),'-adf'))]"
+        "dataFactoryName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-df'))]"
     },
     "resources": [
          {

@@ -4,9 +4,9 @@
     "parameters": {
         "environment": {
             "type": "string",
-            "defaultValue": "dev",
+            "defaultValue": "d",
             "metadata": {
-                "description":"Location for all services"
+                "description":"Development environment"
             }
         },
         "location": {
@@ -67,17 +67,11 @@
             "metadata": {
                 "description": "Flag to activate or deactivate the resource for the Azure Data Factory - Linked self hosted integration runtime"
             }
-        },
-        "selfHostedIRFlag": {
-            "type": "bool",
-            "metadata": {
-                "description": "Flag to activate or deactivate the resource for the Azure Data Factory - self hosted integration runtime"
-            }
         }
     },
     "functions": [],
     "variables": {
-        "dataFactoryName": "[toLower(concat('adf-',parameters('environment'),'-',parameters('dataProduct')))]"
+        "dataFactoryName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-df'))]"
     },
     "resources": [
         {
@@ -91,20 +85,6 @@
             },
             "properties": {},
             "resources": [
-                  {
-                    "condition": "[parameters('selfHostedIRFlag')]",
-                    "type": "integrationRuntimes",
-                    "apiVersion": "2018-06-01",
-                    "name": "sharedIr",
-                    "properties": {
-                        "type": "SelfHosted",
-                        "description": "Shared Integration Runtime from the hub/shared Azure Data Factory",
-                        "typeProperties": {}
-                    },
-                    "dependsOn": [
-                        "[resourceId('Microsoft.DataFactory/factories', variables('dataFactoryName'))]"
-                    ]
-                },
                 {
                     "condition": "[parameters('linkedIRFlag')]",
                     "type": "integrationRuntimes",
@@ -134,7 +114,7 @@
                         "typeProperties": {
                             "url": "[parameters('adlsConnectionstring')]"
                         },
-                        "description": "[concat('Linked Service to the Azure Data Lake Store in the resource group',resourceGroup().name)]"
+                        "description": "[concat('Linked Service to the Azure Data Lake Store in the resource group ',resourceGroup().name)]"
                     },
                     "dependsOn": [
                         "[resourceId('Microsoft.DataFactory/factories', variables('dataFactoryName'))]"
@@ -150,7 +130,7 @@
                         "typeProperties": {
                             "baseUrl": "[parameters('akvUrl')]" 
                         },
-                        "description": "[concat('Linked Service to the Azure Key Vault in the resource group',resourceGroup().name)]"
+                        "description": "[concat('Linked Service to the Azure Key Vault in the resource group ',resourceGroup().name)]"
                     },
                     "dependsOn": [
                         "[resourceId('Microsoft.DataFactory/factories', variables('dataFactoryName'))]"
@@ -173,7 +153,7 @@
                                 "secretName": "[parameters('aSqlSecretName')]"
                             }
                         },
-                        "description": "[concat('Linked Service to the Azure SQL Database in the resource group',resourceGroup().name)]"
+                        "description": "[concat('Linked Service to the Azure SQL Database in the resource group ',resourceGroup().name)]"
                     },
                     "dependsOn": [
                         "[resourceId('Microsoft.DataFactory/factories/linkedservices', variables('dataFactoryName'), 'arm_ls_akv')]",

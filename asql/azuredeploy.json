@@ -64,10 +64,10 @@
   },
   "functions": [],
   "variables": {
-    "databaseName": "[concat('sqldb-',parameters('environment'),'-',parameters('dataProduct'))]",
+    "databaseName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-db'))]",
     "sqlserverAdminLogin": "sqladmin",
-    "sqlserverAdminPassword": "[concat('P', uniqueString(resourceGroup().id,deployment().name, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'x', '!')]",
-    "sqlserverName": "[concat('sql-',parameters('environment'),'-',parameters('dataProduct'))]"
+    "sqlserverAdminPassword": "[concat('P', uniqueString(resourceGroup().id,deployment().name, variables('databaseName')), 'x', '!')]",
+    "sqlserverName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-dbs'))]"
   },
   "resources": [
     {

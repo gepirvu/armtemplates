@@ -3,22 +3,16 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "environment": {
-            "value": "dev"
+            "value": "d"
         },
         "dataProduct": {
-            "value": "lh1"
+            "value": "pricing"
         },
         "databaseEdition": {
             "value": "Basic"
         },
         "databaseRequestedServiceObjectiveName": {
             "value": "Basic" 
-        },
-        "storageSku": {
-            "value": "Standard_LRS" 
-        },
-        "location": {
-            "value": "" 
         }
     }
 }
