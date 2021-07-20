@@ -1,0 +1,110 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageName": {
+            "type": "string"
+        },
+        "principalId": {
+            "type": "string",
+            "metadata": {
+                "description": "The principal to assign the role to"
+            }
+        },
+        "builtInRoleType": {
+            "type": "string",
+            "allowedValues": [
+                "Owner",
+                "Contributor",
+                "Reader",
+                "StorageBlobDataContributor"
+            ],
+            "metadata": {
+                "description": "Built-in role to assign"
+            }
+        },
+        "roleNameGuid": {
+            "type": "string",
+            "defaultValue": "[guid(resourceGroup().id,'StorageBlobDataContributor')]", //https://winterdom.com/2018/08/02/rbac-role-assignments-in-arm-templates
+            "metadata": {
+                "description": "A new GUID used to identify the role assignment"
+            }
+        },
+        "tenantId": {
+            "type": "securestring",
+            "defaultValue": "[subscription().tenantId]",
+            "metadata": {
+                "description": "Tenant Id of the current subscription"
+            }
+        },
+        "keyVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Azure Key Vault to set the access policy"
+            }
+        },
+        /*"dataFactoryName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Azure Data Factory to set the permission for the user"
+            }
+        },*/
+        "userObjectId": {
+            "type": "string",
+            "defaultValue": "6daf350c-1cbe-4feb-91ed-5ce7799fcb60", //Giang
+            "metadata": {
+                "description": "ObjectId of AAD User"
+            }
+        }
+    },
+    "variables": {
+        "Owner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
+        "Contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+        "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+        "StorageBlobDataContributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2020-04-01-preview",
+            "name": "[parameters('roleNameGuid')]",
+            "scope": "[concat('Microsoft.Storage/storageAccounts', '/', parameters('storageName'))]",
+            "properties": {
+                "roleDefinitionId": "[variables(parameters('builtInRoleType'))]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "ServicePrincipal" //https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-template#new-service-principal
+            }
+        },
+         /*{
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2020-04-01-preview",
+            "name": "[parameters('roleNameGuid')]",
+            "scope": "[concat('Microsoft.DataFactory/.factories', '/', parameters('dataFactoryName'))]",
+            "properties": {
+                "roleDefinitionId": "[variables('Owner')]",
+                "principalId": "[parameters('userObjectId')]",
+                "principalType": "ServicePrincipal" //https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-template#new-service-principal
+            }
+        },*/
+        {
+            "type": "Microsoft.KeyVault/vaults/accessPolicies",
+            "name": "[concat(parameters('keyVaultName'),'/add')]",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "accessPolicies": [
+                    {
+                        "tenantId": "[parameters('tenantId')]",
+                        "objectId": "[parameters('principalId')]",
+                        "permissions": {
+                            "secrets": [
+                                "get",
+                                "list"
+                            ]
+                        }
+                    }
+                ]
+            },
+            "dependsOn": []
+        }
+    ]
+}

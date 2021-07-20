@@ -1,0 +1,97 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+            "environment": {
+            "type": "string",
+            "defaultValue": "dev",
+            "metadata": {
+                "description":"Location for all services"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location matches resource group"
+            }
+        },
+        "dataProduct": {
+            "type": "string",
+            "metadata": {
+                "description": "Use Case name"
+            }
+        },
+        "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+                "environment": "[parameters('environment')]",
+                "dataproduct": "[parameters('dataProduct')]",
+                "costCenter": "finance",
+                "serviceOwner": "Giang",
+                "deployment": "ARM"
+            }
+        },
+        "selfHostedIRFlag": {
+            "type": "bool",
+            "metadata": {
+                "description": "Flag to activate or deactivate the resource for the Azure Data Factory - self hosted integration runtime"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "locationInfo": {
+            "westeurope":{
+                "abbreviation": "we"
+            },
+            "northeurope":{
+                "abbreviation": "ne"
+            },
+            "uksouth":{
+                "abbreviation": "uks"
+            }
+        },
+        "region": "[variables('locationInfo')[parameters('location')].abbreviation]",
+        "dataFactoryName": "[toLower(concat('shared-',variables('region'),'-',if(equals(parameters('environment'),'prod'),'prod','devtest'),'-adf'))]"
+    },
+    "resources": [
+         {
+            "type": "Microsoft.DataFactory/factories",
+            "apiVersion": "2018-06-01",
+            "name": "[variables('dataFactoryName')]",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('resourceTags')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {},
+            "resources": [
+                  {
+                    "condition": "[parameters('selfHostedIRFlag')]",
+                    "type": "integrationRuntimes",
+                    "apiVersion": "2018-06-01",
+                    "name": "sharedIr",
+                    "properties": {
+                        "type": "SelfHosted",
+                        "description": "Shared Integration Runtime from the hub/shared Azure Data Factory",
+                        "typeProperties": {}
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.DataFactory/factories', variables('dataFactoryName'))]"
+                    ]
+                }
+            ]
+        }
+    ],
+    "outputs": {
+        "dataFactoryResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.DataFactory/factories', variables('dataFactoryName'))]"
+        },
+        "irId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.DataFactory/factories/integrationruntimes', variables('dataFactoryName'), 'sharedIr')]"
+    }
+    }
+}

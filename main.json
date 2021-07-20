@@ -1,0 +1,215 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environment": {
+            "type": "string",
+            "defaultValue": "dev",
+            "metadata": {
+                "description": "Set development environment"
+            }
+        },
+        "dataProduct": {
+            "type": "string",
+            "metadata": {
+                "description": "Data product name"
+            }
+        },
+        "databaseEdition": {
+            "type": "string",
+            "metadata": {
+                "description": "Database Tier"
+            }
+        },
+        "databaseRequestedServiceObjectiveName": {
+            "type": "string",
+            "metadata": {
+                "description": "Database Tier correspondend scaling options"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        /*{
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "lkTemplSharedAdf",
+            "resourceGroup": "shared-we-devtest-rsg",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/sharedRes/adf/azuredeploy.json')]",
+                    //"relativePath":"./arm-modules/adf/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "environment": {
+                        "value": "[parameters('environment')]"
+                    },
+                    "dataProduct": {
+                        "value": "[parameters('dataProduct')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },*/
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "lkTemplAdf",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/adf/azuredeploy.json')]",
+                    //"relativePath":"./arm-modules/adf/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "environment": {
+                        "value": "[parameters('environment')]"
+                    },
+                    "dataProduct": {
+                        "value": "[parameters('dataProduct')]"
+                    },
+                    "adlsConnectionstring": {
+                        "value": "[reference('lkTemplAdls').outputs.storageAccountConnectionString.value]"
+                    },
+                    "akvUrl": {
+                        "value": "[reference('lkTemplAkv').outputs.akvUrl.value]"
+                    },
+                    "aSqlSecretName": {
+                        "value": "[reference('lkTemplAsql').outputs.asqlSecretName.value]"
+                    },
+                    "sharedIrResourceId": {
+                        "value": "/subscriptions/5cdc739b-d22b-4b07-9e04-1ef854a3b4a6/resourceGroups/rsg-dpshared-np-001/providers/Microsoft.DataFactory/factories/adf-dp-np-001" //TEST
+                    },
+                    "linkedIRFlag": {
+                        "value": false // TODO: Fill in parameter value
+                    },
+                    "linkedServiceFlag": {
+                        "value": true // TODO: Fill in parameter value
+                    },
+                    "selfHostedIRFlag": {
+                        "value": false // TODO: Fill in parameter value
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAsql')]",
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdls')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "lkTemplAdls",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/adls/azuredeploy.json')]",
+                    //"relativePath": "./arm-modules/adls/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "environment": {
+                        "value": "[parameters('environment')]"
+                    },
+                    "dataProduct": {
+                        "value": "[parameters('dataProduct')]"
+                    },
+                    "storageSku": {
+                        "value": "Standard_LRS"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "lkTemplRoleAssignment",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/roleAssignment/azuredeploy.json')]",
+                    //"relativePath":"./arm-modules/roleAssignment/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "builtInRoleType": {
+                        "value": "StorageBlobDataContributor"
+                    },
+                    "principalId": {
+                        "value": "[reference('lkTemplAdf').outputs.dataFactoryPrincipalId.value]" 
+                    },
+                    "storageName": {
+                        "value": "[reference('lkTemplAdls').outputs.storageName.value]"
+                    },
+                    "keyVaultName": {
+                        "value": "[reference('lkTemplAkv').outputs.keyVaultName.value]"
+                    }
+                     
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdf')]"
+            ]
+        },
+         {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "lkTemplAkv",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/akv/azuredeploy.json')]",
+                    //"relativePath":"./arm-modules/akv/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "environment": {
+                        "value": "[parameters('environment')]"
+                    },
+                    "dataProduct": {
+                        "value": "[parameters('dataProduct')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "lkTemplAsql",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/asql/azuredeploy.json')]",
+                    //"relativePath":"./arm-modules/asql/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "databaseRequestedServiceObjectiveName": {
+                        "value": "[parameters('databaseRequestedServiceObjectiveName')]" 
+                    },
+                    "dataBaseEdition": {
+                        "value": "[parameters('databaseEdition')]"
+                    },
+                    "environment": {
+                        "value": "[parameters('environment')]"
+                    },
+                    "dataProduct": {
+                        "value": "[parameters('dataProduct')]"
+                    },
+                    "keyVaultName": {
+                        "value": "[reference('lkTemplAkv').outputs.keyVaultName.value]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAkv')]"
+            ]
+        }
+    ],
+    "outputs": {}
+}
