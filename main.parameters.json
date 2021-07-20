@@ -13,6 +13,12 @@
         },
         "databaseRequestedServiceObjectiveName": {
             "value": "Basic" 
+        },
+        "storageSku": {
+            "value": "Standard_LRS" 
+        },
+        "location": {
+            "value": "" 
         }
     }
 }
