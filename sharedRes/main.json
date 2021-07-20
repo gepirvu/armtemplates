@@ -76,10 +76,10 @@
         },
         "parameters": {
           "dataProduct": {
-              "value": "" 
+              "value": "[parameters('dataProduct')]" 
           },
           "environment": {
-              "value": "d"
+             "value": "[parameters('environment')]"
           },
           "selfHostedIRFlag": {
               "value": true 
