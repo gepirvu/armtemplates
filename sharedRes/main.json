@@ -106,7 +106,7 @@
         },
         "parameters": {
           "virtualMachineName": {
-            "value": "[concat('de-',parameters('dataProduct'),parameters('environment'),'-',copyIndex(),'-vm')]"
+            "value": "[concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-',copyIndex(),'-vm')]"
           },
           "keyVaultName": {
               "value": "[reference('lkTemplAkv').outputs.keyVaultName.value]"
@@ -158,7 +158,7 @@
             "value": "[reference(resourceId(resourceGroup().name, 'Microsoft.Resources/deployments', 'lkTempAdf')).outputs.irId.value]"
           },
           "virtualMachineName": {
-            "value": "[take(concat('sharedVm',copyIndex(),'-', variables('prefix')), 15)]"
+            "value": "[concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-',copyIndex(),'-vm')]" //"[take(concat('sharedVm',copyIndex(),'-', variables('prefix')), 15)]"
           },
           "scriptUrl": {
             "value": "[uri(deployment().properties.templateLink.uri, 'irInstall/irInstall.ps1')]"
