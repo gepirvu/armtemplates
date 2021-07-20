@@ -106,7 +106,7 @@
         },
         "parameters": {
           "virtualMachineName": {
-            "value": "[take(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-',copyIndex(),'-vm'),15)]"
+            "value": "[take(concat('de-sharedir-',copyIndex(),'-vm'),15)]"
           },
           "keyVaultName": {
               "value": "[reference('lkTemplAkv').outputs.keyVaultName.value]"
