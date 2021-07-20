@@ -26,6 +26,18 @@
             "metadata": {
                 "description": "Database Tier correspondend scaling options"
             }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "storageSku": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
         }
     },
     "functions": [],
