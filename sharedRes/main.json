@@ -161,7 +161,7 @@
             "value": "[take(concat('de-sharedir-',copyIndex(),'-vm'),15)]" //"[take(concat('sharedVm',copyIndex(),'-', variables('prefix')), 15)]"
           },
           "scriptUrl": {
-            "value": "[uri(deployment().properties.templateLink.uri, 'irInstall/irInstall.ps1')]"
+            "value": "[uri(deployment().properties.templateLink.uri, 'https://raw.githubusercontent.com/gepirvu/armtemplates/main/sharedRes/irInstall/irInstall.ps1')]"
           }
         }
       }
