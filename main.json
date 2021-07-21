@@ -269,7 +269,7 @@
                     "[resourceId('Microsoft.Resources/deployments', 'lkTemplKv')]"
                 ]
             }
-        }
+        },
          /* {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
@@ -292,7 +292,7 @@
                 },
                 "dependsOn": []
             }
-        }/*
+        }
           /*{
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
