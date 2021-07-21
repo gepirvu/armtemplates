@@ -276,6 +276,7 @@
             "name": "lkTemplAdb",
             "properties": {
                 "mode": "Incremental",
+                "condition": false,
                 "templateLink": {
                     "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/adb/azuredeploy.json')]",
                     //"relativePath":"./arm-modules/syn/azuredeploy.json",
