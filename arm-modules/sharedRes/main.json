@@ -135,40 +135,6 @@
         }
       }
     }
-    /*{
-      "apiVersion": "2021-04-01",
-      "type": "Microsoft.Resources/deployments",
-      "name": "[concat('IRInstalltemplate-', copyIndex())]",
-      "dependsOn": [
-        "vmcopy"
-      ],
-      "copy": {
-        "name": "irinstallcopy",
-        "count": "[parameters('NodeCount')]",
-        "mode": "serial"
-      },
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, 'irInstall/azuredeploy.json')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "existingDataFactoryVersion": {
-            "value": "[parameters('existingDataFactoryVersion')]"
-          },
-          "irId": {
-            "value": "[reference(resourceId(resourceGroup().name, 'Microsoft.Resources/deployments', 'lkTempAdf')).outputs.irId.value]"
-          },
-          "virtualMachineName": {
-            "value": "[concat('de-',parameters('dataProduct'),parameters('environment'),'-',copyIndex(),'-vm')]"
-          },
-          "scriptUrl": {
-            "value": "[uri(deployment().properties.templateLink.uri, 'irInstall/irInstall.ps1')]"
-          }
-        }
-      }
-    }/*
   ],
   "outputs": {
     "dataFactoryResourceId": {
