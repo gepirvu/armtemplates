@@ -134,8 +134,8 @@
           }
         }
       }
-    },
-    {
+    }
+    /*{
       "apiVersion": "2021-04-01",
       "type": "Microsoft.Resources/deployments",
       "name": "[concat('IRInstalltemplate-', copyIndex())]",
@@ -168,7 +168,7 @@
           }
         }
       }
-    }
+    }/*
   ],
   "outputs": {
     "dataFactoryResourceId": {
