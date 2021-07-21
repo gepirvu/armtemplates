@@ -269,8 +269,8 @@
                     "[resourceId('Microsoft.Resources/deployments', 'lkTemplKv')]"
                 ]
             }
-        },
-          {
+        }
+         /* {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
             "name": "lkTemplAdb",
@@ -292,7 +292,7 @@
                 },
                 "dependsOn": []
             }
-        }
+        }/*
           /*{
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
