@@ -53,7 +53,7 @@
             ]
           },
           "protectedSettings": {
-            "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted  -Invoke-WebRequest https://raw.githubusercontent.com/gepirvu/armtemplates/main/arm-modules/sharedRes/irInstall/irInstall.ps1 ', if(equals(parameters('existingDataFactoryVersion'), 'V2'), listAuthKeys(parameters('irId'), '2017-09-01-preview').authKey1, listAuthKeys(parameters('irId'), '2015-10-01').key1))]",
+            "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted  -Invoke-WebRequest -Uri https://raw.githubusercontent.com/gepirvu/armtemplates/main/arm-modules/sharedRes/irInstall/irInstall.ps1 ', if(equals(parameters('existingDataFactoryVersion'), 'V2'), listAuthKeys(parameters('irId'), '2017-09-01-preview').authKey1, listAuthKeys(parameters('irId'), '2015-10-01').key1))]",
           }
         }
       }
