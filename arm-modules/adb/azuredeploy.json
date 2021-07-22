@@ -22,59 +22,65 @@
                 "description": "Use Case name"
             }
         },
-        "pricingTier": {
-            "type": "string",
-            "defaultValue": "standard",
-            "allowedValues": [
-                "trial",
-                "standard",
-                "premium"
-            ],
+          "tenantId": {
+            "type": "securestring",
+            "defaultValue": "[subscription().tenantId]",
             "metadata": {
-                "description": "The pricing tier of workspace."
+                "description": "Tenant Id of the current subscription"
             }
         },
-        "vnetCidr": {
+           "resourceTags": {
+            "type": "object"
+        },
+        "dataProductSize": {
             "type": "string",
-            "defaultValue": "10.179.0.0/16",
+            "defaultValue": "s",
+            "allowedValues": [
+                "s",
+                "m",
+                "l"
+            ],
             "metadata": {
-                "description": "Vnet CIDR"
+                "description": "Tshirt size for the data product"
             }
         }
     },
     "functions": [],
     "variables": {
-        "adbWorkSpaceName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-adb'))]",
-        "adbBeSnetName": "[concat(parameters('dataProduct'),'-be-',parameters('environment'),'-adb','-snet')]",
-        "adbFeSnetName": "[concat(parameters('dataProduct'),'-fe-',parameters('environment'),'-adb','-snet')]",
-        "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]"
-    },
-    "resources": [
-        {
-            "comments": "Deploy Virtual Network for template",
-            "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2020-11-01",
-            "location": "[parameters('location')]",
-            "name": "[variables('vnetName')]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [ "[parameters('vnetCidr')]" ]
-                }
+        "adbTierInfo":{
+            "s":{
+                "pricingTier" : "standard"
+            },
+            "m":{
+                "pricingTier" : "standard"
+            },
+            "l":{
+                "pricingTier" : "premium"
             }
         },
+        "pricingTier": "[variables('adbTierInfo')[parameters('dataProductSize')].pricingTier]",
+        "adbWorkSpaceName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-dbr'))]",
+        "adbBeSnetName": "[concat(parameters('dataProduct'),'-be-',parameters('environment'),'-dbr','-snet')]",
+        "adbFeSnetName": "[concat(parameters('dataProduct'),'-fe-',parameters('environment'),'-dbr','-snet')]",
+        "keyVaultName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
+        "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]",
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"
+    },
+    "resources": [
         {
             "type": "Microsoft.Databricks/workspaces",
             "apiVersion": "2018-04-01",
             "name": "[variables('adbWorkSpaceName')]",
+            "tags": "[parameters('resourceTags')]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "[parameters('pricingTier')]"
+                "name": "[variables('pricingTier')]"
             },
             "properties": {
-                "managedResourceGroupId": "[subscriptionResourceId('Microsoft.Resources/resourceGroups',concat(resourceGroup().name,'-adbmanaged'))]",
+                "managedResourceGroupId": "[subscriptionResourceId('Microsoft.Resources/resourceGroups',concat(resourceGroup().name,'-dbrmanaged'))]",
                 "parameters": {
                     "customVirtualNetworkId": {
-                        "value": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"
+                        "value": "[variables('vnetId')]"
                     },
                     "customPublicSubnetName": {
                         "value": "[variables('adbFeSnetName')]"
@@ -89,18 +95,31 @@
                 }
 
             },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"
-            ]
-
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/accessPolicies",
+            "name": "[concat(variables('keyVaultName'),'/add')]",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "accessPolicies": [
+                    {
+                        "tenantId": "[parameters('tenantId')]",
+                        "objectId": "[reference(resourceId('Microsoft.Databricks/workspaces', variables('adbWorkSpaceName'))).authorizations[0].principalId]",
+                        "permissions": {
+                            "secrets": [
+                                "get",
+                                "list"
+                            ]
+                        }
+                    }
+                ]
+            },
+            "dependsOn": []
         }
     ],
     "outputs": {
-        "outputPublicSnetAdb": {
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('vnetName'),'snetpublicadb')]"
-        },
-        "workspaceUrl": {
+        "adbWorkspaceUrl": {
             "type": "string",
             "value": "[reference(resourceId('Microsoft.Databricks/workspaces', variables('adbWorkSpaceName'))).workspaceUrl]"
         },
@@ -111,6 +130,10 @@
         "adbWorkspaceName": {
             "type": "string",
             "value": "[variables('adbWorkSpaceName')]"
+        },
+        "adbWorkSpaceResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Databricks/workspaces',variables('adbWorkSpaceName'))]"
         }
     }
 }

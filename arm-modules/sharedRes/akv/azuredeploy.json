@@ -77,6 +77,9 @@
             "metadata": {
                 "description": "Service Principals Objects with permissions."
             }
+        },
+         "resourceTags": {
+            "type": "object"
         }
     },
     "variables": {
@@ -86,7 +89,8 @@
     {
         "type": "Microsoft.KeyVault/vaults",
         "name": "[variables('keyVaultName')]",
-        "apiVersion": "2019-09-01",
+        "apiVersion": "2021-04-01-preview",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
         "properties": {
             "enabledForDeployment": "[parameters('enabledForDeployment')]",

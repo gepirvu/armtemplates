@@ -26,44 +26,50 @@
       "type": "string",
       "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
     },
-    "databaseEdition": {
-      "type": "string",
-      "defaultValue": "Basic",
-      "allowedValues": [
-        "Basic",
-        "Standard",
-        "Premium"
-      ]
-    },
-    "databaseMaxSizeBytes": {
-      "type": "string",
-      "defaultValue": "1073741824"
-    },
-    "databaseRequestedServiceObjectiveName": {
-      "type": "string",
-      "defaultValue": "Basic",
-      "allowedValues": [
-        "Basic",
-        "S0",
-        "S1",
-        "S2",
-        "P1",
-        "P2",
-        "P3"
-      ],
-      "metadata": {
-        "description": "Describes the performance level for Edition"
-      }
-    },
     "keyVaultName": {
       "type": "string",
       "metadata": {
         "description": "Name of the Key Vault to set the secrets"
       }
+    },
+    "resourceTags": {
+      "type": "object"
+    },
+    "dataProductSize": {
+      "type": "string",
+      "defaultValue": "s",
+      "allowedValues": [
+        "s",
+        "m",
+        "l"
+      ],
+      "metadata": {
+        "description": "Tshirt size for the data product"
+      }
     }
   },
   "functions": [],
   "variables": {
+    "databaseScale":{
+      "s":{
+        "databaseRequestedServiceObjectiveName":"Basic",
+        "databaseEdition": "Basic",
+        "databaseMaxSizeBytes": "2147483648"
+      },
+      "m":{
+        "databaseRequestedServiceObjectiveName": "S1",
+        "databaseEdition": "Standard",
+        "databaseMaxSizeBytes": "268435456000"
+      },
+      "l":{
+        "databaseRequestedServiceObjectiveName": "S3",
+        "databaseEdition": "Standard",
+        "databaseMaxSizeBytes": "268435456000" 
+      }
+    },
+    "databaseRequestedServiceObjectiveName": "[variables('databaseScale')[parameters('dataProductSize')].databaseRequestedServiceObjectiveName]",
+    "databaseEdition": "[variables('databaseScale')[parameters('dataProductSize')].databaseEdition]",
+    "databaseMaxSizeBytes": "[variables('databaseScale')[parameters('dataProductSize')].databaseMaxSizeBytes]",
     "databaseName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-db'))]",
     "sqlserverAdminLogin": "sqladmin",
     "sqlserverAdminPassword": "[concat('P', uniqueString(resourceGroup().id,deployment().name, variables('databaseName')), 'x', '!')]",
@@ -74,34 +80,34 @@
       "apiVersion": "2021-02-01-preview",
       "name": "[variables('sqlserverName')]",
       "type": "Microsoft.Sql/servers",
+      "tags": "[parameters('resourceTags')]",
       "location": "[parameters('location')]",
       "properties": {
         "administratorLogin": "[variables('sqlserverAdminLogin')]",
         "administratorLoginPassword": "[variables('sqlserverAdminPassword')]"
-      },
-      "tags": {
-        "displayName": "SqlServer"
       },
       "resources": [
         {
           "apiVersion": "2021-02-01-preview",
           "name": "[variables('databaseName')]",
           "type": "databases",
+          "tags": "[parameters('resourceTags')]",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[concat('Microsoft.Sql/servers/', variables('sqlserverName'))]"
           ],
           "properties": {
-            "edition": "[parameters('databaseEdition')]",
+            "edition": "[variables('databaseEdition')]",
             "collation": "[parameters('databaseCollation')]",
-            "maxSizeBytes": "[parameters('databaseMaxSizeBytes')]",
-            "requestedServiceObjectiveName": "[parameters('databaseRequestedServiceObjectiveName')]"
+            "maxSizeBytes": "[variables('databaseMaxSizeBytes')]",
+            "requestedServiceObjectiveName": "[variables('databaseRequestedServiceObjectiveName')]"
           }
         },
         {
           "apiVersion": "2021-02-01-preview", //https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/2020-11-01-preview/servers/firewallrules?tabs=json#serverfirewallruleproperties-object
           "name": "AllowAllWindowsAzureIps",
           "type": "firewallrules",
+          "tags":"[parameters('resourceTags')]",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[resourceId('Microsoft.Sql/servers', variables('sqlserverName'))]"

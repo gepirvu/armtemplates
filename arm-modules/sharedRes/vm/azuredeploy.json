@@ -11,7 +11,7 @@
       },
       "publicIPAllocationMethod": {
         "type": "string",
-        "defaultValue": "Dynamic",
+        "defaultValue": "Static",
         "allowedValues": [
           "Dynamic",
           "Static"
@@ -36,13 +36,6 @@
         "defaultValue": "2019-Datacenter",
         "metadata": {
           "description": "The OS version for the VM. This will pick a fully patched image of this given version."
-        }
-      },
-      "vmSize": {
-        "type": "string",
-        "defaultValue": "Standard_D2_v3",
-        "metadata": {
-          "description": "Size of the virtual machine."
         }
       },
       "location": {
@@ -114,18 +107,58 @@
       "metadata": {
         "description": "description"
       }
-    }
+    },
+     "vmManagedIdentityOption": {
+        "type": "string",
+        "defaultValue": "None",
+        "allowedValues": [
+          "SystemAssigned",
+          "UserAssigned",
+          "None",
+          "SystemAssigned, UserAssigned"
+        ],
+        "metadata": {
+          "description": "Determines whether or not to activate the managed identity of the vm."
+        }
+      },
+       "resourceTags": {
+            "type": "object"
+        },
+      "dataProductSize": {
+        "type": "string",
+        "defaultValue": "s",
+        "allowedValues": [
+          "s",
+          "m",
+          "l"
+        ],
+        "metadata": {
+          "description": "Tshirt size for the data product"
+        }
+      }
     },
     "functions": [],
     "variables": {
+      "vmSizeConfig":{
+        "s":{
+          "vmSize": "Standard_D2_v3"
+        },
+        "m":{
+          "vmSize": "Standard_D4s_v3"
+        },
+        "l":{
+          "vmSize": "Standard_D4s_v3"
+        }
+      },
+      "vmSize": "[variables('vmSizeConfig')[parameters('dataProductSize')].vmSize]",
       "storageAccountName": "[toLower(concat('debootdiags',parameters('environment'),'sacc'))]",
       "nicName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-nic'))]",
       "networkSecurityGroupName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-nsg'))]",
       "adminUsername": "vmadmin",
       "adminPassword": "[concat('P', uniqueString(resourceGroup().id,deployment().name,parameters('virtualMachineName')), 'x', '!')]",
       "publicIPAddressName": "[concat(parameters('virtualMachineName'), '-pip')]",
-      "snetName": "[concat(parameters('dataProduct'),'-sh','-snet')]",
-      "vnetName": "[concat(parameters('dataProduct'),'-sh','-vnet')]",
+      "snetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-snet')]",
+      "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]",
       "publicIP": {
         "publicIPAddress": {
           "id": "[resourceId('Microsoft.Network/publicIPAddresses',  concat(variables('publicIPAddressName')))]"
@@ -143,6 +176,7 @@
         "type": "Microsoft.Storage/storageAccounts",
         "apiVersion": "2021-04-01",
         "name": "[variables('storageAccountName')]",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
         "sku": {
           "name": "Standard_LRS"
@@ -154,6 +188,7 @@
         "type": "Microsoft.Network/publicIPAddresses",
         "apiVersion": "2019-09-01",
         "name": "[variables('publicIPAddressName')]",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
         "sku": {
           "name": "[parameters('publicIpSku')]"
@@ -169,6 +204,7 @@
         "type": "Microsoft.Network/networkSecurityGroups",
         "apiVersion": "2019-09-01",
         "name": "[variables('networkSecurityGroupName')]",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
         "properties": {
           "securityRules": [
@@ -193,6 +229,7 @@
         "type": "Microsoft.Network/virtualNetworks",
         "apiVersion": "2019-09-01",
         "name": "[variables('vnetName')]",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
         "properties": {
           "addressSpace": {
@@ -214,6 +251,7 @@
         "type": "Microsoft.Network/networkInterfaces",
         "apiVersion": "2020-11-01",
         "name": "[variables('nicName')]",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
         "properties": {
           "ipConfigurations": [
@@ -236,10 +274,14 @@
         "type": "Microsoft.Compute/virtualMachines",
         "apiVersion": "2021-03-01",
         "name": "[parameters('virtualMachineName')]",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
+        "identity": {
+          "type": "[parameters('vmManagedIdentityOption')]"
+        },
         "properties": {
           "hardwareProfile": {
-            "vmSize": "[parameters('vmSize')]"
+            "vmSize": "[variables('vmSize')]"
           },
           "osProfile": {
             "computerName": "[parameters('computerName')]",

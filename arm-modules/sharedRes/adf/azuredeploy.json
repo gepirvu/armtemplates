@@ -23,12 +23,7 @@
             }
         },
         "resourceTags": {
-            "type": "object",
-            "defaultValue": {
-                "environment": "devtest",
-                "dataproduct": "[parameters('dataProduct')]",
-                "deployment": "ARM"
-            }
+            "type": "object"
         },
         "selfHostedIRFlag": {
             "type": "bool",

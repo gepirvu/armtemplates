@@ -6,13 +6,13 @@
             "value": "pricing"
         },
         "environment": {
-            "value": "shared"
+            "value": "sh"
         },
         "existingDataFactoryVersion": {
             "value": "V2"
         },
-        "IntegrationRuntimeName": {
-            "value": "sharedIr"
+        "dataProductSize": {
+            "value": "s"
         },
         "NodeCount": {
             "value": 1

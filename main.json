@@ -4,7 +4,7 @@
     "parameters": {
         "environment": {
             "type": "string",
-            "defaultValue": "dev",
+            "defaultValue": "d",
             "metadata": {
                 "description": "Set development environment"
             }
@@ -17,43 +17,49 @@
         },
         "databaseEdition": {
             "type": "string",
+            "defaultValue": "Basic",
             "metadata": {
                 "description": "Database Tier"
             }
         },
         "databaseRequestedServiceObjectiveName": {
             "type": "string",
+            "defaultValue": "Basic",
             "metadata": {
                 "description": "Database Tier correspondend scaling options"
+            }
+        },
+        "adbDeployment": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "description"
+            }
+        },
+           "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+                "environment": "[parameters('environment')]",
+                "dataproduct": "[parameters('dataProduct')]",
+                "deployment": "ARM"
+            }
+        },
+        "dataProductSize": {
+            "type": "string",
+            "defaultValue": "s",
+            "allowedValues": [
+                "s",
+                "m",
+                "l"
+            ],
+            "metadata": {
+                "description": "Tshirt size for the data product"
             }
         }
     },
     "functions": [],
     "variables": {},
     "resources": [
-        /*{
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2021-04-01",
-            "name": "lkTemplSharedRes",
-            "resourceGroup": "shared-we-devtest-rsg",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/sharedRes/main.json')]",
-                    //"relativePath":"./arm-modules/adf/azuredeploy.json",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "environment": {
-                        "value": "[parameters('environment')]"
-                    },
-                    "dataProduct": {
-                        "value": "[parameters('dataProduct')]"
-                    }
-                }
-            },
-            "dependsOn": []
-        },*/
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
@@ -75,9 +81,6 @@
                     "adlsConnectionstring": {
                         "value": "[reference('lkTemplDls').outputs.storageAccountConnectionString.value]"
                     },
-                    "akvUrl": {
-                        "value": "[reference('lkTemplKv').outputs.akvUrl.value]"
-                    },
                     "aSqlSecretName": {
                         "value": "[reference('lkTemplAsql').outputs.asqlSecretName.value]"
                     },
@@ -90,15 +93,14 @@
                     "linkedServiceFlag": {
                         "value": true 
                     },
-                    "abdWorkspaceUrl": {
-                        "value": "[reference('lkTemplAdb').outputs.workspaceUrl.value]"
+                    "resourceTags": {
+                        "value": "[parameters('resourceTags')]"
                     }
                 }
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAsql')]",
-                "[resourceId('Microsoft.Resources/deployments', 'lkTemplDls')]",
-                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdb')]"
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdb')]",
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAsql')]"
             ]
         },
         {
@@ -121,9 +123,18 @@
                     },
                     "storageSku": {
                         "value": "Standard_LRS"
+                    },
+                    "storageAccountBehindVNet": {
+                        "value": "false"
+                    },
+                    "resourceTags": {
+                        "value": "[parameters('resourceTags')]"
                     }
                 }
-            }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplVnet')]"
+            ]
         },
         {
             "type": "Microsoft.Resources/deployments",
@@ -146,27 +157,25 @@
                     "storageName": {
                         "value": "[reference('lkTemplDls').outputs.storageName.value]"
                     },
-                    "keyVaultName": {
-                        "value": "[reference('lkTemplKv').outputs.keyVaultName.value]"
-                    },
                     "synapsePrincipalId": {
                         "value": "[reference('lkTemplSyn').outputs.synapsePrincipalId.value]"
                     },
                     "synapseWorkspaceName": {
                         "value": "[reference('lkTemplSyn').outputs.synapseWorkSpaceName.value]"
                     },
-                    "adbWorkspaceName": {
-                        "value": "[reference('lkTemplAdb').outputs.adbWorkspaceName.value]"
+                    "dataProduct": {
+                        "value": "[parameters('dataProduct')]"
                     },
-                    "adbPrincipaId": {
-                        "value": "[reference('lkTemplAdb').outputs.workspacePrincipalId.value]" 
+                    "environment": {
+                        "value": "[parameters('environment')]"
                     }
                 }
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdf')]",
                 "[resourceId('Microsoft.Resources/deployments', 'lkTemplSyn')]",
-                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdb')]"
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdb')]",
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAml')]"
             ]
         },
          {
@@ -186,10 +195,18 @@
                     },
                     "dataProduct": {
                         "value": "[parameters('dataProduct')]"
+                    },
+                    "keyVaultBehindVNet": {
+                        "value": "false"
+                    },
+                    "resourceTags": {
+                        "value": "[parameters('resourceTags')]"
                     }
                 }
             },
-            "dependsOn": []
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplVnet')]"
+            ]
         },
         {
             "type": "Microsoft.Resources/deployments",
@@ -203,12 +220,6 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "databaseRequestedServiceObjectiveName": {
-                        "value": "[parameters('databaseRequestedServiceObjectiveName')]" 
-                    },
-                    "dataBaseEdition": {
-                        "value": "[parameters('databaseEdition')]"
-                    },
                     "environment": {
                         "value": "[parameters('environment')]"
                     },
@@ -217,6 +228,12 @@
                     },
                     "keyVaultName": {
                         "value": "[reference('lkTemplKv').outputs.keyVaultName.value]"
+                    },
+                    "resourceTags": {
+                        "value": "[parameters('resourceTags')]"
+                    },
+                    "dataProductSize": {
+                        "value": "[parameters('dataProductSize')]"
                     }
                 }
             },
@@ -262,6 +279,9 @@
                     },
                     "dlsFsName": {
                         "value": "[reference('lkTemplDls').outputs.dlsFsName.value]"
+                    },
+                    "resourceTags": {
+                        "value": "[parameters('resourceTags')]"
                     }
                 },
                 "dependsOn": [
@@ -269,14 +289,42 @@
                     "[resourceId('Microsoft.Resources/deployments', 'lkTemplKv')]"
                 ]
             }
+            
         },
          {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "lkTemplVnet",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/vnet/azuredeploy.json')]",
+                    //"relativePath":"./arm-modules/asql/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "environment": {
+                        "value": "[parameters('environment')]"
+                    },
+                    "dataProduct": {
+                        "value": "[parameters('dataProduct')]"
+                    },
+                    "resourceTags": {
+                        "value": "[parameters('resourceTags')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdbNetwork')]"
+            ]
+        },
+          {
+            "condition": "[parameters('adbDeployment')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
             "name": "lkTemplAdb",
             "properties": {
                 "mode": "Incremental",
-                "condition": false,
                 "templateLink": {
                     "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/adb/azuredeploy.json')]",
                     //"relativePath":"./arm-modules/syn/azuredeploy.json",
@@ -288,19 +336,28 @@
                     },
                     "dataProduct": {
                         "value": "[parameters('dataProduct')]"
+                    },
+                    "resourceTags": {
+                        "value": "[parameters('resourceTags')]"
+                    },
+                    "dataProductSize": {
+                        "value": "[parameters('dataProductSize')]"
                     }
                 },
-                "dependsOn": []
+                "dependsOn": [
+                    "[resourceId('Microsoft.Resources/deployments', 'lkTemplKv')]"
+                ]
             }
-        }
-          /*{
+        },
+          {
+            "condition": "[parameters('adbDeployment')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
-            "name": "lkTemplNsg",
+            "name": "lkTemplAdbNetwork",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/adb/adb-child/nsg/azuredeploy.json')]",
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/adb/adb-child/adbNetwork/azuredeploy.json')]",
                     //"relativePath":"./arm-modules/nsg/azuredeploy.json",
                     "contentVersion": "1.0.0.0"
                 },
@@ -310,11 +367,50 @@
                     },
                     "dataProduct": {
                         "value": "[parameters('dataProduct')]"
+                    },
+                    "resourceTags": {
+                        "value": "[parameters('resourceTags')]"
                     }
                 },
                 "dependsOn": []
             }
-        }*/
+        },
+          {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "lkTemplAml",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-modules/aml/azuredeploy.json')]",
+                    //"relativePath":"./arm-modules/asql/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "environment": {
+                        "value": "[parameters('environment')]"
+                    },
+                    "dataProduct": {
+                        "value": "[parameters('dataProduct')]"
+                    },
+                    "resourceTags": {
+                        "value": "[parameters('resourceTags')]"
+                    },
+                    "allowPublicAccessWhenBehindVnet": {
+                        "value": false
+                    },
+                    "containerRegistryBehindVNet": {
+                        "value": "false"
+                    },
+                    "storageAccountBehindVNet": {
+                        "value": "false"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdf')]"
+            ]
+        }
     ],
     "outputs": {}
 }

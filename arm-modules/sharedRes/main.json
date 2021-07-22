@@ -9,13 +9,6 @@
         "description": "your existing data factory version"
       }
     },
-    "IntegrationRuntimeName": {
-      "type": "string",
-      "defaultValue": "sharedIr",
-      "metadata": {
-        "description": "IR name must be unique in subscription"
-      }
-    },
     "NodeCount": {
       "type": "int",
       "defaultValue": 1,
@@ -37,7 +30,27 @@
             "metadata": {
                 "description": "Use Case name"
             }
-        }
+        },
+    "resourceTags": {
+      "type": "object",
+      "defaultValue": {
+        "environment": "devtest",
+        "dataproduct": "[parameters('dataProduct')]",
+        "deployment": "ARM"
+      }
+    },
+    "dataProductSize": {
+      "type": "string",
+      "defaultValue": "s",
+      "allowedValues": [
+        "s",
+        "m",
+        "l"
+      ],
+      "metadata": {
+        "description": "Tshirt size for the data product"
+      }
+    }
   },
   "variables": {},
   "resources": [
@@ -58,6 +71,9 @@
                     },
                     "dataProduct": {
                         "value": "[parameters('dataProduct')]"
+                    },
+                    "resourceTags": {
+                        "value": "[parameters('resourceTags')]"
                     }
                 }
             },
@@ -83,6 +99,9 @@
           },
           "selfHostedIRFlag": {
               "value": true 
+          },
+          "resourceTags": {
+              "value": "[parameters('resourceTags')]"
           }
         }
       }
@@ -131,6 +150,15 @@
           },
           "environment": {
               "value": "[parameters('environment')]"
+          },
+          "vmManagedIdentityOption": {
+              "value": "None"
+          },
+          "resourceTags": {
+              "value": "[parameters('resourceTags')]"
+          },
+          "dataProductSize": {
+            "value": "[parameters('dataProductSize')]"
           }
         }
       }

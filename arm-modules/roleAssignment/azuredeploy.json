@@ -11,26 +11,13 @@
                 "description": "The principal to assign the role to"
             }
         },
-        "tenantId": {
-            "type": "securestring",
-            "defaultValue": "[subscription().tenantId]",
-            "metadata": {
-                "description": "Tenant Id of the current subscription"
-            }
-        },
-        "keyVaultName": {
-            "type": "string",
-            "metadata": {
-                "description": "Name of the Azure Key Vault to set the access policy"
-            }
-        },
         "dataFactoryName": {
             "type": "string",
             "metadata": {
                 "description": "Name of the Azure Data Factory to set the permission for the user"
             }
         },
-            "userObjectId": {
+        "userObjectId": {
             "type": "array",
             "defaultValue": [
                 {
@@ -56,27 +43,70 @@
                 "description": "description"
             }
         },
-        "adbWorkspaceName": {
+        "environment": {
             "type": "string",
+            "defaultValue": "d",
             "metadata": {
-                "description": "description"
+                "description": "Development environment"
             }
         },
-        "adbPrincipaId": {
-            "type": "securestring",
+        "dataProduct": {
+            "type": "string",
             "metadata": {
-                "description": "description"
+                "description": "Use Case name"
+            }
+        },
+        "amlManagedIdentityName": {
+            "type": "String",
+            "defaultValue": "systemAssigned",
+            "metadata": {
+                "description": "Resource name of User Assigned Identity passed in workspace.properties.amlManagedIdentity."
+            }
+        },
+        "assignWorkspaceResourceGroup": {
+            "defaultValue": true,
+            "type": "Bool",
+            "metadata": {
+                "description": "If assign AML workspace resource group permissions."
+            }
+        },
+        "assignWorkspaceKeyVault": {
+            "defaultValue": false,
+            "type": "Bool",
+            "metadata": {
+                "description": "If assign AML workspace keyvault permissions."
+            }
+        },
+        "assignWorkspaceStorageAccount": {
+            "defaultValue": true,
+            "type": "Bool",
+            "metadata": {
+                "description": "If assign AML workspace storage account permissions."
+            }
+        },
+        "assignWorkspaceContainerRegistry": {
+            "defaultValue": true,
+            "type": "Bool",
+            "metadata": {
+                "description": "If assign AML workspace container registry permissions."
+            }
+        },
+        "assignWorkspaceDataBrick": {
+            "defaultValue": true,
+            "type": "Bool",
+            "metadata": {
+                "description": "If assign AML workspace linked Azure DataBrick permissions."
             }
         }
     },
     "variables": {
-        "roleNameGuid":"[guid(resourceGroup().id,'StorageBlobDataContributor')]",
         "Owner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
         "Contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
         "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
         "StorageBlobDataContributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
         "StorageBlobDataReader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1')]",
-        "WorkspaceAdmin": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '6e4bf58a-b8e1-4cc3-bbf9-d73143322b78')]"
+        "adbWorkSpaceName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-dbr'))]",
+        "machineLearningWorkspaceName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-aml'))]"
     },
     "resources": [
         {
@@ -93,8 +123,8 @@
         {
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2020-04-01-preview",
-            "name": "[guid(uniqueString(resourceGroup().id,parameters('adbWorkspaceName')))]", //https://winterdom.com/2018/08/02/rbac-role-assignments-in-arm-templates
-            "scope": "[concat('Microsoft.Databricks/workspaces', '/', parameters('adbWorkspaceName'))]",
+            "name": "[guid(uniqueString(resourceGroup().id,variables('adbWorkspaceName')))]", //https://winterdom.com/2018/08/02/rbac-role-assignments-in-arm-templates
+            "scope": "[concat('Microsoft.Databricks/workspaces', '/', variables('adbWorkspaceName'))]",
             "properties": {
                 "roleDefinitionId": "[variables('Contributor')]",
                 "principalId": "[parameters('dataFactoryPrincipalId')]",
@@ -115,7 +145,7 @@
         {
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2020-04-01-preview",
-            "copy":{
+            "copy": {
                 "name": "assignment",
                 "count": "[length(parameters('userObjectId'))]"
             },
@@ -127,46 +157,36 @@
                 "principalType": "User"
             }
         },
-         /*{
+        {
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2020-04-01-preview",
-            "name": "[parameters('roleNameGuid')]",
-            "scope": "[concat('Microsoft.DataFactory/.factories', '/', parameters('dataFactoryName'))]",
-            "properties": {
-                "roleDefinitionId": "[variables('Owner')]",
-                "principalId": "[parameters('userObjectId')]",
-                "principalType": "ServicePrincipal" //https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-template#new-service-principal
-            }
-        },*/
-        {
-            "type": "Microsoft.KeyVault/vaults/accessPolicies",
-            "name": "[concat(parameters('keyVaultName'),'/add')]",
-            "apiVersion": "2019-09-01",
-            "properties": {
-                "accessPolicies": [
-                    {
-                        "tenantId": "[parameters('tenantId')]",
-                        "objectId": "[parameters('dataFactoryPrincipalId')]",
-                        "permissions": {
-                            "secrets": [
-                                "get",
-                                "list"
-                            ]
-                        }
-                    },
-                    {
-                        "tenantId": "[parameters('tenantId')]",
-                        "objectId": "[parameters('adbPrincipaId')]",
-                        "permissions": {
-                            "secrets": [
-                                "get",
-                                "list"
-                            ]
-                        }
-                    }
-                ]
+            "copy": {
+                "name": "assignment",
+                "count": "[length(parameters('userObjectId'))]"
             },
-            "dependsOn": []
+            "name": "[guid(uniqueString(resourceGroup().id,'1',parameters('userObjectId')[copyIndex('assignment')].Id))]",
+            "scope": "[concat('Microsoft.Databricks/workspaces/', variables('adbWorkspaceName'))]",
+            "properties": {
+                "roleDefinitionId": "[variables('Contributor')]",
+                "principalId": "[parameters('userObjectId')[copyIndex('assignment')].Id]",
+                "principalType": "User"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2020-04-01-preview",
+            "name": "[guid(uniqueString(resourceGroup().id,variables('machineLearningWorkspaceName')))]",
+            "scope": "[concat('Microsoft.MachineLearningServices/workspaces/', variables('machineLearningWorkspaceName'))]",
+            "properties": {
+                "roleDefinitionId": "[variables('Contributor')]",
+                "principalId": "[parameters('dataFactoryPrincipalId')]",
+                "principalType": "ServicePrincipal"
+            }
         }
     ]
 }
+
+
+
+
+

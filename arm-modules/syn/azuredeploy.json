@@ -98,6 +98,9 @@
         "metadata": {
           "description": "Name of the referenced Azure Data Lake container"
         }
+      },
+      "resourceTags": {
+        "type": "object"
       }
     },
     "variables": {
@@ -116,6 +119,7 @@
         "type": "Microsoft.Storage/storageAccounts",
         "apiVersion": "2019-06-01",
         "name": "[variables('dlsName')]",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
         "sku": {
           "name": "Standard_LRS"
@@ -145,6 +149,7 @@
         "type": "Microsoft.Synapse/workspaces",
         "apiVersion": "2019-06-01-preview",
         "name": "[variables('workspaceName')]",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
         "identity": {
           "type": "SystemAssigned"
@@ -204,6 +209,7 @@
         "type": "Microsoft.Synapse/workspaces/sqlPools",
         "apiVersion": "2019-06-01-preview",
         "name": "[concat(variables('workspaceName'), '/', variables('sqlPoolName'))]",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
         "sku": {
           "name": "[parameters('sku')]"
@@ -236,6 +242,7 @@
         "type": "Microsoft.Synapse/workspaces/bigDataPools",
         "apiVersion": "2019-06-01-preview",
         "name": "[concat(variables('workspaceName'), '/', variables('sparkPoolName'))]",
+        "tags": "[parameters('resourceTags')]",
         "location": "[parameters('location')]",
         "dependsOn": [
           "[variables('workspaceName')]"

@@ -6,13 +6,13 @@
             "value": "d"
         },
         "dataProduct": {
-            "value": "pricing"
+            "value": "drone" 
         },
-        "databaseEdition": {
-            "value": "Basic"
+        "dataProductSize": {
+            "value": "s"
         },
-        "databaseRequestedServiceObjectiveName": {
-            "value": "Basic" 
+        "adbDeployment": {
+            "value": false
         }
     }
 }

@@ -34,11 +34,53 @@
             "metadata": {
                 "description": "Data Product or Use Case Name"
             }
+        },
+        "storageAccountBehindVNet": {
+            "type": "string",
+            "defaultValue": "false",
+            "allowedValues": [
+                "true",
+                "false"
+            ],
+            "metadata": {
+                "description": "Determines whether or not to put the storage account behind VNet"
+            }
+        },
+           "resourceTags": {
+            "type": "object"
         }
      },
     "variables": {
         "storageAccountName": "[toLower(concat('de',parameters('dataProduct'),parameters('environment'),'dls'))]",
-        "dlsFsName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-fs')]"
+        "dlsFsName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-fs')]",
+        "adbBeSnetName": "[concat(parameters('dataProduct'),'-be-',parameters('environment'),'-dbr','-snet')]",
+        "adbFeSnetName": "[concat(parameters('dataProduct'),'-fe-',parameters('environment'),'-dbr','-snet')]",
+        "computeSnetName": "[concat(parameters('dataProduct'),'-compute-',parameters('environment'),'-snet')]",
+        "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]",
+        "computeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('computeSnetName'))]",
+        "adbFeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('adbFeSnetName'))]",
+        "adbBeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('adbBeSnetName'))]",
+        "networkRuleSetBehindVNet": {
+            "defaultAction": "deny",
+            "virtualNetworkRules": [
+                {
+                    "action": "Allow",
+                    "id": "[variables('computeSubnet')]"
+                },
+                {
+                    "action": "Allow",
+                    "id": "[variables('adbFeSubnet')]"
+                },
+                {
+                    "action": "Allow",
+                    "id": "[variables('adbBeSubnet')]"
+                }
+            ]
+        },
+        "networkRuleSetDefault": {
+            "defaultAction": "Allow",
+            "bypass": "AzureServices"
+        }
     },
     "functions": [],
     "resources": [
@@ -46,6 +88,7 @@
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2021-04-01",
             "location": "[parameters('location')]",
+            "tags": "[parameters('resourceTags')]",
             "name": "[variables('storageAccountName')]",
             "kind": "StorageV2",
             "sku": {
@@ -54,7 +97,8 @@
             "properties": {
                 "accessTier": "Hot",
                 "isHnsEnabled": true,
-                "supportsHttpsTrafficOnly": true
+                "supportsHttpsTrafficOnly": true,
+                "networkAcls": "[if(equals(parameters('storageAccountBehindVNet'), 'true'), variables('networkRuleSetBehindVNet'), variables('networkRuleSetDefault'))]"
             },
             "resources": [
                 {

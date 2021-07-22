@@ -34,11 +34,11 @@
                 "description": "Specifies if the vault is enabled for volume encryption"
             }
         },
-          "environment": {
+        "environment": {
             "type": "string",
             "defaultValue": "d",
             "metadata": {
-                "description":"Development environment"
+                "description": "Development environment"
             }
         },
         "location": {
@@ -77,23 +77,67 @@
             "metadata": {
                 "description": "User principals Objects with permissions."
             }
+        },
+        "keyVaultBehindVNet": {
+            "type": "string",
+            "defaultValue": "false",
+            "allowedValues": [
+                "true",
+                "false"
+            ],
+            "metadata": {
+                "description": "description"
+            }
+        },
+           "resourceTags": {
+            "type": "object"
         }
     },
     "variables": {
-        "keyVaultName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]"
+        "adbBeSnetName": "[concat(parameters('dataProduct'),'-be-',parameters('environment'),'-dbr','-snet')]",
+        "adbFeSnetName": "[concat(parameters('dataProduct'),'-fe-',parameters('environment'),'-dbr','-snet')]",
+        "computeSnetName": "[concat(parameters('dataProduct'),'-compute-',parameters('environment'),'-snet')]",
+        "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]",
+        "keyVaultName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
+        "computeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('computeSnetName'))]",
+        "adbFeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('adbFeSnetName'))]",
+        "adbBeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('adbBeSnetName'))]",
+        "networkRuleSetBehindVNet": {
+            "defaultAction": "deny",
+            "virtualNetworkRules": [
+                {
+                    "action": "Allow",
+                    "id": "[variables('computeSubnet')]"
+                },
+                {
+                    "action": "Allow",
+                    "id": "[variables('adbFeSubnet')]"
+                },
+                {
+                    "action": "Allow",
+                    "id": "[variables('adbBeSubnet')]"
+                }
+            ]
+        },
+        "networkRuleSetDefault": {
+            "defaultAction": "Allow",
+            "bypass": "AzureServices"
+        }
     },
     "resources": [
-    {
-        "type": "Microsoft.KeyVault/vaults",
-        "name": "[variables('keyVaultName')]",
-        "apiVersion": "2019-09-01",
-        "location": "[parameters('location')]",
-        "properties": {
-            "enabledForDeployment": "[parameters('enabledForDeployment')]",
-            "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
-            "enabledForVolumeEncryption": "[parameters('enableVaultForVolumeEncryption')]",
-            "tenantId": "[subscription().tenantId]",
-              "copy": [
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "name": "[variables('keyVaultName')]",
+            "apiVersion": "2021-04-01-preview",
+            "tags":"[parameters('resourceTags')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "enabledForDeployment": "[parameters('enabledForDeployment')]",
+                "enableSoftDelete": false,
+                "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
+                "enabledForVolumeEncryption": "[parameters('enableVaultForVolumeEncryption')]",
+                "tenantId": "[subscription().tenantId]",
+                "copy": [
                     {
                         "name": "accessPolicies",
                         "count": "[length(parameters('userObjectId'))]",
@@ -104,21 +148,18 @@
                         }
                     }
                 ],
-            "sku": {
-                "name": "[parameters('vaultSku')]",
-                "family": "A"
-            },
-            "networkAcls": {
-                "defaultAction": "Allow",
-                "bypass": "AzureServices"
+                "sku": {
+                    "name": "[parameters('vaultSku')]",
+                    "family": "A"
+                },
+                "networkAcls": "[if(equals(parameters('keyVaultBehindVNet'), 'true'), variables('networkRuleSetBehindVNet'), variables('networkRuleSetDefault'))]"
             }
         }
-    }
     ],
     "outputs": {
         "akvUrl": {
             "type": "string",
-            "value": "[concat('https://',variables('keyVaultName'),'.vault.azure.net/')]"
+            "value": "[reference(resourceId('Microsoft.KeyVault/vaults',variables('keyVaultName'))).vaultUri]"
         },
         "keyVaultName": {
             "type": "string",
