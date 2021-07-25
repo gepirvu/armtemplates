@@ -133,7 +133,6 @@
             "location": "[parameters('location')]",
             "properties": {
                 "enabledForDeployment": "[parameters('enabledForDeployment')]",
-                "enableSoftDelete": false,
                 "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
                 "enabledForVolumeEncryption": "[parameters('enableVaultForVolumeEncryption')]",
                 "tenantId": "[subscription().tenantId]",
