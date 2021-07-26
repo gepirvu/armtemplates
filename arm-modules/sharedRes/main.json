@@ -208,7 +208,7 @@
             "value": "[concat(parameters('countryCode'),'-',parameters('dataProduct'),parameters('environment'),'-',copyIndex(),'-vm')]"
           },
           "scriptUrl": {
-            "value": "[uri(deployment().properties.templateLink.uri, 'irInstall/irInstall.ps1')]"
+            "value": "https://raw.githubusercontent.com/gepirvu/armtemplates/main/arm-modules/sharedRes/irInstall/irInstall.ps1"
           }
         }
       }
