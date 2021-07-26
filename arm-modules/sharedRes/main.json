@@ -205,7 +205,7 @@
             "value": "[reference(resourceId(resourceGroup().name, 'Microsoft.Resources/deployments', 'lkTempAdf')).outputs.irId.value]"
           },
           "virtualMachineName": {
-            "value": "[concat('de-',parameters('dataProduct'),parameters('environment'),'-',copyIndex(),'-vm')]"
+            "value": "[concat(parameters('countryCode'),'-',parameters('dataProduct'),parameters('environment'),'-',copyIndex(),'-vm')]"
           },
           "scriptUrl": {
             "value": "[uri(deployment().properties.templateLink.uri, 'irInstall/irInstall.ps1')]"
