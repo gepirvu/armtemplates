@@ -17,7 +17,7 @@
         },
         "adbDeployment": {
             "type": "bool",
-            "defaultValue": false,
+            "defaultValue": true,
             "metadata": {
                 "description": "description"
             }
