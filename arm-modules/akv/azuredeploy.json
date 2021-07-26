@@ -98,7 +98,7 @@
         "adbFeSnetName": "[concat(parameters('dataProduct'),'-fe-',parameters('environment'),'-dbr','-snet')]",
         "computeSnetName": "[concat(parameters('dataProduct'),'-compute-',parameters('environment'),'-snet')]",
         "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]",
-        "keyVaultName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-akv111'))]",
+        "keyVaultName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-akv'))]",
         "computeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('computeSnetName'))]",
         "adbFeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('adbFeSnetName'))]",
         "adbBeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('adbBeSnetName'))]",
