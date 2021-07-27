@@ -4,6 +4,13 @@ Azure Resource Manager (ARM) is the native platform for infrastructure as code (
 
 This reporsiotory consist of multiple ARM templates that are used to deploy the Phoenix Azure Data Platform. 
 
+#Table of Content
+- [Infrastructure as Code - ARM Templates](#infrastructure-as-code---arm-templates)
+  * [Features](#features)
+  * [Technology](#technology)
+  * [Installation](#installation)
+  * [Development](#development)
+
 ## Features
 
 - Generic ARM templates adapted for the Data Mesh concept
@@ -37,11 +44,11 @@ Commonly the ARM tenplates are either stored in an Azure Storage Account or any 
 
 Visual Studio Code can be used to connect to a repository, e.g. Azure Repos to locally write ARM Templates and also commit changes to the Azure repos. It is the same way of working with [Git](https://git-scm.com/). Therefore a URL of the repository is needed to connect to it.
 
-In the useres preferred terminal the following commands are always used to deploy the written ARM templates.
+In the users preferred terminal the following commands are always used to deploy the written ARM templates.
 
 **Connect to the Azure Account (Powershell) using a Service Principal:**
 
-```sh
+```powershell
 $User = "<Service Principal Application Id>"
 $Password = ConvertTo-SecureString -String "<Service Principal Secret>" -AsPlainText -Force
 $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $User, $Password
@@ -57,7 +64,7 @@ az login --service-principal -u $User -p $Password --tenant <Tenant Id of the Az
 
 **Connect to the Azure Account (Powershell) using a user account:**
 
-```sh
+```powershell
 Connect-AzAccount
 Set-AzContext -Subscription "<Azure Subscription Id>"
 ```
@@ -70,7 +77,7 @@ az account set --subscription <name or id>
 
 **Deploy the ARM templates to Azure (Powershell):**
 
-```sh
+```powershell
 $TemplateUri = "SAS URL or Github Raw Content URL"
 $TemplateParamterUri(optional) = "<SAS URL or Github Raw Content URL>" 
 New-AzResourceGroupDeployment -ResourceGroupName "<Resource group name>" -TemplateUri $TemplateUri -TemplateParameterUri $TemplateParamterUri -Verbose
