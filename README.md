@@ -12,12 +12,12 @@ This reporsiotory consist of multiple ARM templates that are used to deploy the 
 - Sizing through simple T-Shit sizes
 - Reusable for different Data Products and development environments
 
-## Tech
+## Technology
 
 ARM is part of a big cloud system and therefore exclusively used in:
 
 - [Microsoft Azure Cloud](https://azure.microsoft.com/en-us/) - Microsoft own cloud
-- [JSON](https://www.json.org/json-en.html) - The syntax that ARM is using to the Azure services
+- [JSON](https://www.json.org/json-en.html) - The syntax that ARM is using to deploy the Azure services
 
 Micrososft offers a number of quick start templates to get a feeling of the capabilities of ARM. These can be found on [Github](https://github.com/Azure/azure-quickstart-templates)
 
