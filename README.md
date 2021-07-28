@@ -4,7 +4,8 @@ Azure Resource Manager (ARM) is the native platform for infrastructure as code (
 
 This reporsiotory consist of multiple ARM templates that are used to deploy the Phoenix Azure Data Platform. 
 
-##Table of Content
+## Table of Content
+
 - [Infrastructure as Code - ARM Templates](#infrastructure-as-code---arm-templates)
   * [Features](#features)
   * [Technology](#technology)
