@@ -204,7 +204,8 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdf')]",
                 "[resourceId('Microsoft.Resources/deployments', 'lkTemplSyn')]",
-                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdb')]"
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdb')]",
+                 "[resourceId('Microsoft.Resources/deployments', 'lkTemplAml')]"
             ]
         },
         {
