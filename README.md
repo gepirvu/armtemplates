@@ -54,7 +54,7 @@ $Password = ConvertTo-SecureString -String "<Service Principal Secret>" -AsPlain
 $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $User, $Password
 Connect-AzAccount -Credential $cred -Tenant "<Tenant Id of the Azure Subscription>" -Subscription "<Azure Subscription Id>" -ServicePrincipal
 ```
-**Connect to the Azure Account (Azure ClI) using a Service Principal:**
+**Connect to the Azure Account (Azure Cli) using a Service Principal:**
 
 ```sh
 $User = "<Service Principal Application Id>"
@@ -83,7 +83,7 @@ $TemplateParamterUri(optional) = "<SAS URL or Github Raw Content URL>"
 New-AzResourceGroupDeployment -ResourceGroupName "<Resource group name>" -TemplateUri $TemplateUri -TemplateParameterUri $TemplateParamterUri -Verbose
 ```
 
-**Deploy the ARM templates to Azure (Azure CLI):**
+**Deploy the ARM templates to Azure (Azure Cli):**
 
 ```sh
 az deployment group create --resource-group <resource group name> --name <custom deployment name> --subscription <subscription Id> --template-uri <SAS URL or Github Raw Content URL>  --parameters param1='<exampleValue>' param2='exampleValue'
