@@ -54,6 +54,7 @@
           },
           "protectedSettings": {
             "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File irInstall.ps1 ', if(equals(parameters('existingDataFactoryVersion'), 'V2'), listAuthKeys(parameters('irId'), '2017-09-01-preview').authKey1, listAuthKeys(parameters('irId'), '2015-10-01').key1))]"
+            ////Uncomment below if deployment is from public available Azure Storage
             //"commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File arm-modules/sharedRes/irInstall/irInstall.ps1 ', if(equals(parameters('existingDataFactoryVersion'), 'V2'), listAuthKeys(parameters('irId'), '2017-09-01-preview').authKey1, listAuthKeys(parameters('irId'), '2015-10-01').key1))]"
           }
         }

@@ -205,7 +205,7 @@
                 "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdf')]",
                 "[resourceId('Microsoft.Resources/deployments', 'lkTemplSyn')]",
                 "[resourceId('Microsoft.Resources/deployments', 'lkTemplAdb')]",
-                 "[resourceId('Microsoft.Resources/deployments', 'lkTemplAml')]"
+                "[resourceId('Microsoft.Resources/deployments', 'lkTemplAml')]"
             ]
         },
         {
@@ -419,8 +419,7 @@
                 },
                 "dependsOn": []
             }
-        }
-        ,
+        },
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",

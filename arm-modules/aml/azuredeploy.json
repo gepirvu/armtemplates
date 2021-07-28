@@ -224,7 +224,7 @@
           "name": "[parameters('containerRegistrySku')]"
         },
         "identity": {
-          "type": "None"
+          "type": "[parameters('crManagedIdentityOption')]"
         },
         "dependsOn": [],
         "tags": "[parameters('resourceTags')]",

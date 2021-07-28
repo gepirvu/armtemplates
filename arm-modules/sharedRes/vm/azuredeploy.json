@@ -106,14 +106,22 @@
         "description": "country code"
       }
     },
-    "storageAccountBehindVNet": {
-      "type": "bool",
-      "allowedValues": [
-        true,
-        false
-      ],
+    "adminUserName": {
+      "type": "string",
       "metadata": {
-        "description": "Determines whether or not to put the storage account behind VNet"
+        "description": "Admin User name of the Azure VM"
+      }
+    },
+    "adminPwdSecretName": {
+      "type": "string",
+      "metadata": {
+        "description": "Admin Password secret Name for the Key Vault"
+      }
+    },
+    "storageUri": {
+      "type": "string",
+      "metadata": {
+        "description": "Endpoint of the Azure Blob Storage"
       }
     }
   },
@@ -132,13 +140,10 @@
     },
     "vmSize": "[variables('vmSizeConfig')[parameters('dataProductSize')].vmSize]",
     "keyVaultName": "[toLower(concat(parameters('countryCode'),'-sh-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
-    "storageAccountName": "[toLower(concat(parameters('countryCode'),'bootdiag',parameters('dataProduct'),parameters('environment'),'sacc'))]",
-    "nicName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-nic'))]",
-    "adminUsername": "vmadmin",
+    "nicName": "[toLower(concat(parameters('virtualMachineName'),'-nic'))]",
     "adminPassword": "[concat('P', uniqueString(resourceGroup().id,deployment().name,parameters('virtualMachineName')), 'x', '!')]",
     "publicIPAddressName": "[concat(parameters('virtualMachineName'), '-pip')]",
     "snetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-snet')]",
-    "subnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]",
     "vnetName": "[concat(parameters('dataProduct'),'-','sh','-vnet')]",
     "publicIP": {
       "publicIPAddress": {
@@ -150,38 +155,9 @@
       "subnet": {
         "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets/', variables('vnetName'), variables('snetName'))]"
       }
-    },
-    "networkRuleSetBehindVNet": {
-      "defaultAction": "deny",
-      "bypass": "AzureServices",
-      "virtualNetworkRules": [
-        {
-          "action": "Allow",
-          "id": "[variables('subnet')]"
-        }
-      ]
-    },
-    "networkRuleSetDefault": {
-      "defaultAction": "Allow",
-      "bypass": "AzureServices"
     }
   },
   "resources": [
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2021-04-01",
-      "name": "[variables('storageAccountName')]",
-      "tags": "[parameters('resourceTags')]",
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "Standard_LRS"
-      },
-      "properties": {
-        "supportsHttpsTrafficOnly": true,
-        "networkAcls": "[if(parameters('storageAccountBehindVNet'), variables('networkRuleSetBehindVNet'), variables('networkRuleSetDefault'))]"
-      },
-      "kind": "Storage"
-    },
     {
       "condition": "[parameters('publicIpOption')]",
       "type": "Microsoft.Network/publicIPAddresses",
@@ -232,7 +208,7 @@
         },
         "osProfile": {
           "computerName": "[parameters('computerName')]",
-          "adminUsername": "[variables('adminUsername')]",
+          "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[variables('adminPassword')]"
         },
         "storageProfile": {
@@ -257,22 +233,21 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob]"
+            "storageUri": "[parameters('storageUri')]" 
           }
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
       ]
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-04-01-preview",
-      "name": "[concat(variables('keyVaultName'),'/','vmAdminUser')]",
+      "name": "[concat(variables('keyVaultName'),'/',parameters('adminUserName'))]",
       "location": "[parameters('location')]",
       "properties": {
-        "value": "[variables('adminUsername')]"
+        "value": "[parameters('adminUsername')]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]"
@@ -281,7 +256,7 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-04-01-preview",
-      "name": "[concat(variables('keyVaultName'),'/','vmAdminPwd')]",
+      "name": "[concat(variables('keyVaultName'),'/',parameters('adminPwdSecretName'))]",
       "location": "[parameters('location')]",
       "properties": {
         "value": "[variables('adminPassword')]"

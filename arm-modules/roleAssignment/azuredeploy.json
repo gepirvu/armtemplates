@@ -136,8 +136,7 @@
                 "principalId": "[parameters('userObjectId')[copyIndex('assignment')].Id]",
                 "principalType": "User"
             }
-        }
-        ,
+        },
         {
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2020-04-01-preview",
@@ -149,7 +148,6 @@
                 "principalType": "ServicePrincipal"
             }
         }
-
     ]
 }
 
