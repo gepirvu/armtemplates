@@ -251,7 +251,7 @@
         "name": "[variables('machineLearningWorkspaceName')]",
         "location": "[parameters('location')]",
         "identity": {
-          "type": "None"
+          "type": "[parameters('amlManagedIdentityOption')]"
         },
         "dependsOn": [
           "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
