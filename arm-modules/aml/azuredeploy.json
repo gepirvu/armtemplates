@@ -262,6 +262,7 @@
         "properties": {
           "friendlyName": "[variables('machineLearningWorkspaceName')]",
           "storageAccount": "[variables('storageAccount')]",
+          "keyVault": "[variables('keyVault')]",
           "applicationInsights": "[variables('applicationInsights')]",
           "containerRegistry": "[ variables('containerRegistry')]",
           "adbWorkspace": "[variables('adbWorkSpace')]",
