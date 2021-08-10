@@ -68,7 +68,7 @@
     },
     "storageAccountBehindVNet": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "allowedValues": [
         true,
         false
@@ -107,6 +107,26 @@
       "metadata": {
         "description": "Location for all resources."
       }
+    },
+    "nextHopType": {
+      "type": "string",
+      "defaultValue": "VirtualAppliance",
+      "allowedValues": [
+        "VirtualNetworkGateway",
+        "VnetLocal",
+        "Internet",
+        "VirtualAppliance"
+      ],
+      "metadata": {
+        "description": "The type of Azure hop the packet should be sent to"
+      }
+    },
+    "nextHopIpAdress": {
+      "type": "string",
+      "defaultValue": "10.248.51.4",
+      "metadata": {
+        "description": "The IP address packets should be forwarded to. Next hop values are only allowed in routes where the next hop type is VirtualAppliance."
+      }
     }
   },
   "variables": {
@@ -122,6 +142,8 @@
     "vnetName": "[concat(parameters('dataProduct'),'-','sh','-vnet')]",
     "snetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-snet')]",
     "subnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]",
+    "subnetCidrPositionLogic": "[string(add(int(substring(parameters('vnetAddressPrefix'),add(add(indexOf(parameters('vnetAddressPrefix'),'.'),1),add(indexOf(parameters('vnetAddressPrefix'),'.'),2)),sub(length(parameters('vnetAddressPrefix')),add(indexOf(parameters('vnetAddressPrefix'),'/'),1)))),2))]",
+    "subnetPrefix": "[if(equals(parameters('environment'),'dt'),replace(parameters('vnetAddressPrefix'),'/23','/24'),concat('10.249.',variables('subnetCidrPositionLogic'),'.0/24'))]",
     "storageAccountName": "[toLower(concat(parameters('countryCode'),'bootdiag',parameters('dataProduct'),parameters('environment'),'sacc'))]",
     "networkRuleSetBehindVNet": {
       "defaultAction": "deny",
@@ -136,7 +158,15 @@
     "networkRuleSetDefault": {
       "defaultAction": "Allow",
       "bypass": "AzureServices"
-    }
+    },
+    "serviceEndpointsAll": [
+      {
+        "service": "Microsoft.Storage"
+      },
+      {
+        "service": "Microsoft.KeyVault"
+      }
+    ]
   },
   "resources": [
     {
@@ -181,7 +211,40 @@
             "value": "[parameters('resourceTags')]"
           }
         }
-      }
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "lkTemplRt",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'rt/azuredeploy.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "dataProduct": {
+            "value": "[parameters('dataProduct')]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          },
+          "resourceTags": {
+            "value": "[parameters('resourceTags')]"
+          },
+          "nextHopIpAdress": {
+            "value": "[parameters('nextHopIpAdress')]"
+          },
+          "nextHopType": {
+            "value": "[parameters('nextHopType')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "irInstall"
+      ]
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -329,7 +392,7 @@
             "value": "[concat(parameters('countryCode'),'-sh-',parameters('dataProduct'),parameters('environment'),'-',copyIndex(),'-vm')]"
           },
           "scriptUrl": {
-            "value": "https://raw.githubusercontent.com/gepirvu/armtemplates/main/arm-modules/sharedRes/irInstall/irInstall.ps1"
+            "value": "https://raw.githubusercontent.com/Gyang91/testingArmTemplates/main/arm-modules/sharedRes/irInstall/irInstall.ps1"
             //Uncomment below if deployment is from public available Azure Storage
             //"value": "[uri(deployment().properties.templateLink.uri, 'irInstall/irInstall.ps1')]"
           }
@@ -337,6 +400,25 @@
       },
       "dependsOn": [
         "vmcopy"
+      ]
+    },
+    {
+      "comments": "Associate Route Table with subnet",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2019-09-01",
+      "name": "[concat(variables('vnetName'), '/', variables('snetName'))]",
+      "properties": {
+        "addressPrefix": "[variables('subnetPrefix')]",
+        "routeTable": {
+          "id": "[reference('lkTemplRt').outputs.routeTableId.value]"
+        },
+        "networkSecurityGroup": {
+          "id": "[reference('lkTemplNetwork').outputs.nsgId.value]"
+        },
+        "serviceEndpoints": "[variables('serviceEndpointsAll')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'lkTemplRt')]"
       ]
     }
   ],
