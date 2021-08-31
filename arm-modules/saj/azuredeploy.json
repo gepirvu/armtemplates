@@ -1,0 +1,203 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "dataProduct": {
+            "type": "string",
+            "metadata": {
+                "description": "Use Case name"
+            }
+        },
+        "environment": {
+            "type": "string",
+            "defaultValue": "d",
+            "metadata": {
+                "description": "Location for all services"
+            }
+        },
+        "resourceTags": {
+            "type": "object"
+        },
+        "dataProductSize": {
+            "type": "string",
+            "defaultValue": "s",
+            "allowedValues": [
+                "s",
+                "m",
+                "l"
+            ],
+            "metadata": {
+                "description": "Tshirt size for the data product"
+            }
+        },
+        "countryCode": {
+            "type": "string",
+            "defaultValue": "cs",
+            "metadata": {
+                "description": "country code"
+            }
+        },
+         "iotHubDeployment": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Decides to deploy or not to deploy IoT Hub Db"
+            }
+        },
+        "eventhubDeployment": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Decides to deploy or not to deploy Event Hub"
+            }
+        }
+    },
+    "variables": {
+        "sajScale": {
+            "s": {
+                "streamingUnits": 3
+            },
+            "m": {
+                "streamingUnits": 3
+            },
+            "l": {
+                "streamingUnits": 5
+            }
+        },
+        "streamingUnits": "[variables('sajScale')[parameters('dataProductSize')].streamingUnits]",
+        "streamingJobName": "[concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-saj')]",
+        "StorageBlobDataContributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+        "IoTHubDataContributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '4fc6c259-987e-4a07-842e-c321cc9d413f')]",
+        "AzureEventHubsDataOwner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'f526a384-b230-433a-b45c-95f59c4a2dec')]",
+         "eventHubName": "[concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-eh')]",
+        "eventHubNamespaceName": "[concat(variables('eventHubName'), '-ns')]",
+        "iotHubName": "[concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-ioth')]",
+        "storageAccountName": "[toLower(concat(parameters('countryCode'),parameters('dataProduct'),parameters('environment'),'dls'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.StreamAnalytics/StreamingJobs",
+            "apiVersion": "2017-04-01-preview",
+            "name": "[variables('streamingJobName')]",
+            "tags": "[parameters('resourceTags')]",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "systemAssigned"
+            },
+            "properties": {
+                "sku": {
+                    "name": "standard"
+                },
+                "eventsOutOfOrderPolicy": "Adjust",
+                "eventsOutOfOrderMaxDelayInSeconds": 0,
+                "eventsLateArrivalMaxDelayInSeconds": 5,
+                "transformation": {
+                    "name": "Transformation",
+                    "properties": {
+                        "streamingUnits": "[int(variables('streamingUnits'))]",
+                        "query": "SELECT\r\n    *\r\nINTO\r\n    [YourOutputAlias]\r\nFROM\r\n    [YourInputAlias]"
+                    }
+                }
+            }
+        },
+        {
+            "condition": "[parameters('iotHubDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "sajRoleAssignmentToIoth",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2020-04-01-preview",
+                            "name": "[guid(uniqueString(resourceGroup().id,variables('streamingJobName')))]", //https://winterdom.com/2018/08/02/rbac-role-assignments-in-arm-templates
+                            "scope": "[concat('Microsoft.Devices/IotHubs', '/', variables('iotHubName'))]",
+                            "properties": {
+                                "roleDefinitionId": "[variables('IoTHubDataContributor')]",
+                                "principalId": "[reference(resourceId('Microsoft.StreamAnalytics/StreamingJobs', variables('streamingJobName')), '2019-06-01', 'Full').identity.principalId]",
+                                "principalType": "ServicePrincipal" //https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-template#new-service-principal
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.StreamAnalytics/StreamingJobs', variables('streamingJobName'))]"
+            ]
+        },
+        {
+            "condition": "[parameters('eventhubDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "sajRoleAssignmentToEh",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2020-04-01-preview",
+                            "name": "[guid(uniqueString(resourceGroup().id,variables('streamingJobName'),variables('eventHubName')))]", //https://winterdom.com/2018/08/02/rbac-role-assignments-in-arm-templates
+                            "scope": "[concat('Microsoft.EventHub/namespaces', '/', variables('eventHubNamespaceName'))]",
+                            "properties": {
+                                "roleDefinitionId": "[variables('AzureEventHubsDataOwner')]",
+                                "principalId": "[reference(resourceId('Microsoft.StreamAnalytics/StreamingJobs', variables('streamingJobName')), '2019-06-01', 'Full').identity.principalId]",
+                                "principalType": "ServicePrincipal" //https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-template#new-service-principal
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.StreamAnalytics/StreamingJobs', variables('streamingJobName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "sajRoleAssignmentToDls",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2020-04-01-preview",
+                            "name": "[guid(uniqueString(resourceGroup().id,variables('streamingJobName'),variables('storageAccountName')))]", //https://winterdom.com/2018/08/02/rbac-role-assignments-in-arm-templates
+                            "scope": "[concat('Microsoft.Storage/storageAccounts', '/', variables('storageAccountName'))]",
+                            "properties": {
+                                "roleDefinitionId": "[variables('StorageBlobDataContributor')]",
+                                "principalId": "[reference(resourceId('Microsoft.StreamAnalytics/StreamingJobs', variables('streamingJobName')), '2019-06-01', 'Full').identity.principalId]",
+                                "principalType": "ServicePrincipal" //https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-template#new-service-principal
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.StreamAnalytics/StreamingJobs', variables('streamingJobName'))]"
+            ]
+        }
+    ],
+    "outputs": {
+        "sajPrincipalId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.StreamAnalytics/StreamingJobs', variables('streamingJobName')), '2019-06-01', 'Full').identity.principalId]"
+        }
+    }
+}
