@@ -1,0 +1,137 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "type": "string",
+      "defaultValue": "d",
+      "metadata": {
+        "description": "Development environment"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location matches resource group"
+      }
+    },
+    "dataProduct": {
+      "type": "string",
+      "metadata": {
+        "description": "Use Case name"
+      }
+    },
+    "capacity": {
+      "type": "string",
+      "defaultValue": "4",
+      "allowedValues": [
+        "4",
+        "16"
+      ],
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "resourceTags": {
+      "type": "object"
+    },
+    "countryCode": {
+      "type": "string",
+      "defaultValue": "cs",
+      "metadata": {
+        "description": "country code"
+      }
+    }
+  },
+  "variables": {
+    "pviewAccountName": "[concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-pview')]",
+    "storageAccountName": "[toLower(concat(parameters('countryCode'),parameters('dataProduct'),parameters('environment'),'dls'))]",
+    "sqlserverName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-dbs'))]",
+    "StorageBlobDataContributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]"
+  },
+  "resources": [
+    {
+      "name": "[variables('pviewAccountName')]",
+      "type": "Microsoft.Purview/accounts",
+      "apiVersion": "2020-12-01-preview",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "networkAcls": {
+          "defaultAction": "Allow"
+        }
+      },
+      "dependsOn": [],
+      "sku": {
+        "name": "Standard",
+        "capacity": "[parameters('capacity')]"
+      },
+      "tags": "[parameters('resourceTags')]"
+    },
+    {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "pviewRoleAssignmentToDls",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2020-04-01-preview",
+                            "name": "[guid(uniqueString(resourceGroup().id,variables('pviewAccountName')))]", //https://winterdom.com/2018/08/02/rbac-role-assignments-in-arm-templates
+                            "scope": "[concat('Microsoft.Storage/storageAccounts', '/', variables('storageAccountName'))]",
+                            "properties": {
+                                "roleDefinitionId": "[variables('StorageBlobDataContributor')]",
+                                "principalId": "[reference(resourceId(resourceGroup().name,'Microsoft.Purview/accounts',variables('pviewAccountName')),'2018-06-01','Full').identity.principalId]",
+                                "principalType": "ServicePrincipal" //https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-template#new-service-principal
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Purview/accounts', variables('pviewAccountName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "pviewRoleAssignmentToAsql",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2020-04-01-preview",
+                            "name": "[guid(uniqueString(resourceGroup().id,variables('pviewAccountName')))]", //https://winterdom.com/2018/08/02/rbac-role-assignments-in-arm-templates
+                            "scope": "[concat('Microsoft.Sql/servers', '/', variables('sqlserverName'))]",
+                            "properties": {
+                                "roleDefinitionId": "[variables('StorageBlobDataContributor')]",
+                                "principalId": "[reference(resourceId(resourceGroup().name,'Microsoft.Purview/accounts',variables('pviewAccountName')),'2018-06-01','Full').identity.principalId]",
+                                "principalType": "ServicePrincipal" //https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-template#new-service-principal
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Purview/accounts', variables('pviewAccountName'))]"
+            ]
+        }
+  ],
+  "outputs": {
+    "pviewPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId(resourceGroup().name,'Microsoft.Purview/accounts',variables('pviewAccountName')),'2018-06-01','Full').identity.principalId]"
+    }
+  }
+}
