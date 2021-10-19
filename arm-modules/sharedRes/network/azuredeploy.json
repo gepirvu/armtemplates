@@ -99,7 +99,7 @@
                         "name": "[variables('snetName')]",
                         "properties": {
                             //"addressPrefix": "[variables('subnetPrefix')]",
-                            "addressPrefix": "10.249.26.0/24"
+                            "addressPrefix": "10.249.26.0/24",
                             "networkSecurityGroup": {
                                 "id": "[variables('nsgId')]"
                             },
