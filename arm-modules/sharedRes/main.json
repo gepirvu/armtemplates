@@ -11,7 +11,7 @@
     },
     "environment": {
       "type": "string",
-      "defaultValue": "p",
+      "defaultValue": "dt",
       "metadata": {
         "description": "Ldveelopment environment: dt = devtest, p = prod"
       }
