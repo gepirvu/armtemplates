@@ -44,8 +44,8 @@
         "networkSecurityGroupName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-nsg'))]",
         "snetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-snet')]",
         "subnetCidrPositionLogic": "[string(add(int(substring(parameters('addressPrefix'),add(add(indexOf(parameters('addressPrefix'),'.'),1),add(indexOf(parameters('addressPrefix'),'.'),2)),sub(length(parameters('addressPrefix')),add(indexOf(parameters('addressPrefix'),'/'),1)))),2))]",
-        //"subnetPrefix": ["10.249.26.0/24"],
-        "subnetPrefix": "[if(equals(parameters('environment'),'dt'),replace(parameters('addressPrefix'),'/23','/24'),concat('10.249.',variables('subnetCidrPositionLogic'),'.0/24'))]",
+        "subnetPrefix": ["10.249.26.0/24"],
+       // "subnetPrefix": "[if(equals(parameters('environment'),'dt'),replace(parameters('addressPrefix'),'/23','/24'),concat('10.249.',variables('subnetCidrPositionLogic'),'.0/24'))]",
         "vnetName": "[concat(parameters('dataProduct'),'-sh-','vnet')]",
         "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
         "serviceEndpointsAll": [
@@ -98,8 +98,8 @@
                     {
                         "name": "[variables('snetName')]",
                         "properties": {
-                            "addressPrefix": "[variables('subnetPrefix')]",
-                           // "addressPrefix": "10.249.26.0/24",
+                           // "addressPrefix": "[variables('subnetPrefix')]",
+                            "addressPrefix": "10.249.26.0/24",
                             "networkSecurityGroup": {
                                 "id": "[variables('nsgId')]"
                             },
