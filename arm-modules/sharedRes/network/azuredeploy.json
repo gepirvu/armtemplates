@@ -103,6 +103,9 @@
                             "networkSecurityGroup": {
                                 "id": "[variables('nsgId')]"
                             },
+                            "routeTable": {
+                                "id":"/subscriptions/c0625ef7-6e06-488d-8cbd-49cf482fe41e/resourceGroups/cs-sh-av01pricing-p-rg/providers/Microsoft.Network/routeTables/cs-pricing-p-rt"
+                            },
                             "serviceEndpoints": "[variables('serviceEndpointsAll')]"
                         }
                     }
