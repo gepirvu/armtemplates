@@ -143,7 +143,7 @@
     "snetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-snet')]",
     "subnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]",
     "subnetCidrPositionLogic": "[string(add(int(substring(parameters('vnetAddressPrefix'),add(add(indexOf(parameters('vnetAddressPrefix'),'.'),1),add(indexOf(parameters('vnetAddressPrefix'),'.'),2)),sub(length(parameters('vnetAddressPrefix')),add(indexOf(parameters('vnetAddressPrefix'),'/'),1)))),2))]",
-    "subnetPrefix": "[if(equals(parameters('environment'),'dt'),replace(parameters('vnetAddressPrefix'),'/23','/24'),concat('10.249.',variables('subnetCidrPositionLogic'),'.0/24'))]",
+    "subnetPrefix": "[if(equals(parameters('environment'),'dt'),replace(parameters('vnetAddressPrefix'),'/24','/26'),concat('10.249.',variables('subnetCidrPositionLogic'),'.0/26'))]",
     "storageAccountName": "[toLower(concat(parameters('countryCode'),'bootdiag',parameters('dataProduct'),'p','sacc'))]",
     "networkRuleSetBehindVNet": {
       "defaultAction": "deny",
