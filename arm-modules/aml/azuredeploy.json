@@ -125,7 +125,7 @@
     "storageAccountName": "[toLower(concat(parameters('countryCode'),parameters('dataProduct'),'aml',parameters('environment'),'sacc'))]",
     "containerRegistryName": "[toLower(concat(parameters('countryCode'),parameters('dataProduct'),parameters('environment'),'cr'))]",
     "applicationInsightsName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'ai'))]",
-    "keyVaultName": "[toLower(concat(parameters('countryCode'),'-dp-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
+    "keyVaultName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
     "adbBeSnetName": "[concat(parameters('dataProduct'),'-be-',parameters('environment'),'-dbr','-snet')]",
     "adbFeSnetName": "[concat(parameters('dataProduct'),'-fe-',parameters('environment'),'-dbr','-snet')]",
     "computeSnetName": "[concat(parameters('dataProduct'),'-compute-',parameters('environment'),'-snet')]",

@@ -64,7 +64,7 @@
         "adbFeSnetName": "[concat(parameters('dataProduct'),'-fe-',parameters('environment'),'-dbr','-snet')]",
         "computeSnetName": "[concat(parameters('dataProduct'),'-compute-',parameters('environment'),'-snet')]",
         "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]",
-        "keyVaultName": "[toLower(concat(parameters('countryCode'),'-dp-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
+        "keyVaultName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
         "synapseName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-syn'))]",
         "workspaceName": "[toLower(concat(variables('synapseName'),'ws'))]",
         "synapseResourceId": "[resourceId(resourceGroup().name,'Microsoft.Synapse/workspaces',variables('workspaceName'))]",

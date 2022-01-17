@@ -71,7 +71,7 @@
         "applicationInsightsName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'ai'))]",
         "storageAccountName": "[concat(parameters('countryCode'),parameters('dataProduct'),parameters('environment'),'fa','sacc')]",
         "functionWorkerRuntime": "[parameters('runtime')]",
-        "keyVaultName": "[toLower(concat(parameters('countryCode'),'-dp-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]"
+        "keyVaultName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]"
     },
     "resources": [
         {
