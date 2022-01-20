@@ -75,7 +75,7 @@
     "databaseName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-db'))]",
     "sqlserverAdminLogin": "sqladmin",
     "sqlserverAdminPassword": "[concat('P', uniqueString(resourceGroup().id,deployment().name, variables('databaseName')), 'x', '!')]",
-    "sqlserverName": "[toLower(concat(parameters('countryCode'),parameters('dataProduct'),parameters('environment'),'-ssassrv'))]",
+    "sqlserverName": "[toLower(concat(parameters('countryCode'),parameters('dataProduct'),parameters('environment'),'ssassrv'))]",
     "keyVaultName": "[toLower(concat(parameters('countryCode'),'-dp-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
     "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]",
     "computeSnetName": "[concat(parameters('dataProduct'),'-compute-',parameters('environment'),'-snet')]"
