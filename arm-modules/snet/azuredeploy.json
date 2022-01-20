@@ -88,6 +88,7 @@
       "properties": {
         "addressPrefix": "[parameters('computeSubnetCidr')]",
         "serviceEndpoints": "[variables('serviceEndpointsAll')]",
+        "privateEndpointNetworkPolicies": "Disabled",
         "networkSecurityGroup": {
           "id": "[variables('nsgComputeId')]"
         }

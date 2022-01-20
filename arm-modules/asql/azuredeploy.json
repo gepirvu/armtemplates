@@ -94,7 +94,8 @@
     "sqlserverName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-dbs'))]",
     "keyVaultName": "[toLower(concat(parameters('countryCode'),'-dp-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
     "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]",
-    "computeSnetName": "[concat(parameters('dataProduct'),'-compute-',parameters('environment'),'-snet')]"
+    "computeSnetName": "[concat(parameters('dataProduct'),'-compute-',parameters('environment'),'-snet')]",
+    "privateEndpointName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-', variables('sqlserverName'),'-pe')]"
   },
   "resources": [
     {
@@ -192,6 +193,32 @@
           ]
         }
       ]
+    },
+    {
+      "type": "Microsoft.Network/privateEndpoints",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('privateEndpointName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[variables('vnetName')]",
+        "[variables('sqlServerName')]"
+      ],
+      "properties": {
+        "subnet": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('computeSnetName'))]"
+        },
+        "privateLinkServiceConnections": [
+          {
+            "name": "[variables('privateEndpointName')]",
+            "properties": {
+              "privateLinkServiceId": "[resourceId('Microsoft.Sql/servers',variables('sqlServerName'))]",
+              "groupIds": [
+                "sqlServer"
+              ]
+            }
+          }
+        ]
+      }
     }
   ],
   "outputs": {
