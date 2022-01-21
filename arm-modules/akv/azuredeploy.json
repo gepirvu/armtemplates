@@ -168,7 +168,7 @@
             "name": "[variables('privateEndpointName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
-              "[resourceId('Microsoft.Storage/storageAccounts', variables('keyVaultName'))]"
+              "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
             ],
             "properties": {
               "subnet": {
@@ -178,7 +178,7 @@
                 {
                   "name": "[variables('privateEndpointName')]",
                   "properties": {
-                    "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('keyVaultName'))]",
+                    "privateLinkServiceId": "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
                     "groupIds": [
                       "vault"
                    ]
