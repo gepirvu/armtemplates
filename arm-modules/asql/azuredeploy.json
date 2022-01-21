@@ -200,7 +200,6 @@
       "name": "[variables('privateEndpointName')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-      //  "[variables('vnetName')]",
         "[variables('sqlServerName')]"
       ],
       "properties": {

@@ -167,7 +167,6 @@
             "name": "[variables('privateEndpointName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
-            //  "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]", 
               "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
             ],
             "properties": {
