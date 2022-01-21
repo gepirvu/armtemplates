@@ -153,7 +153,7 @@
     },
     "vmSize": "[variables('vmSizeConfig')[parameters('dataProductSize')].vmSize]",
     "storageAccountName": "[toLower(concat('debootdiags',parameters('environment'),'sacc'))]",
-    "keyVaultName": "[toLower(concat(parameters('countryCode'),'-dp-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
+    "keyVaultName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
     "nicName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-nic'))]",
     "networkSecurityGroupName": "[toLower(concat('de-',parameters('dataProduct'),'-',parameters('environment'),'-nsg'))]",
     "adminUsername": "vmadmin",

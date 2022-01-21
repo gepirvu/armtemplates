@@ -106,7 +106,7 @@
     },
     "variables": {
       "synapseName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-syn'))]",
-      "keyVaultName": "[toLower(concat(parameters('countryCode'),'-dp-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
+      "keyVaultName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
       "dlsName": "[toLower(concat(parameters('countryCode'),'syn',parameters('dataProduct'),parameters('environment'),'dls'))]",
       "dlsFsName": "[toLower(concat(variables('dlsName'),'-fs'))]",
       "sqlPoolName": "[toLower(concat(variables('workspaceName'),'syndw'))]",

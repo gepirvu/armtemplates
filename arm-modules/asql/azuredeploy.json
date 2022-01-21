@@ -92,7 +92,7 @@
     "sqlserverAdminLogin": "sqladmin",
     "sqlserverAdminPassword": "[concat('P', uniqueString(resourceGroup().id,deployment().name, variables('databaseName')), 'x', '!')]",
     "sqlserverName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-dbs'))]",
-    "keyVaultName": "[toLower(concat(parameters('countryCode'),'-dp-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
+    "keyVaultName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
     "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]",
     "computeSnetName": "[concat(parameters('dataProduct'),'-compute-',parameters('environment'),'-snet')]"
   },

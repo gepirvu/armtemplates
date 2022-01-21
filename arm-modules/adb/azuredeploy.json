@@ -69,7 +69,7 @@
         "adbWorkSpaceName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-dbr'))]",
         "adbBeSnetName": "[concat(parameters('dataProduct'),'-be-',parameters('environment'),'-dbr','-snet')]",
         "adbFeSnetName": "[concat(parameters('dataProduct'),'-fe-',parameters('environment'),'-dbr','-snet')]",
-        "keyVaultName": "[toLower(concat(parameters('countryCode'),'-dp-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
+        "keyVaultName": "[toLower(concat(parameters('countryCode'),'-',parameters('dataProduct'),'-',parameters('environment'),'-kv'))]",
         "vnetName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-vnet')]",
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"
     },
