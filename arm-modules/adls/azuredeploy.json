@@ -72,6 +72,7 @@
         "computeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('computeSnetName'))]",
         "adbFeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('adbFeSnetName'))]",
         "adbBeSubnet": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('adbBeSnetName'))]",
+        "privateEndpointName": "[concat(parameters('dataProduct'),'-',parameters('environment'),'-', variables('storageAccountName'),'-pe')]",
         "networkRuleSetBehindVNet": {
             "resourceAccessRules": [
                 {
@@ -158,7 +159,33 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
             ]
-        }
+        },
+
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('privateEndpointName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('computeSnetName'))]"
+              },
+              "privateLinkServiceConnections": [
+                {
+                  "name": "[variables('privateEndpointName')]",
+                  "properties": {
+                    "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                    "groupIds": [
+                      "dfs"
+                   ]
+                  }
+                }
+              ]
+            }
+          }
     ],
     "outputs": {
         "storageName": {
