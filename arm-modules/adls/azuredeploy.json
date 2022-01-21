@@ -178,10 +178,10 @@
                 {
                   "name": "[variables('privateEndpointName')]",
                   "properties": {
-                    "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
-                //    "groupIds": [
-               //       "storageAccount"
-              //     ]
+                    "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                    "groupIds": [
+                      "dfs"
+                   ]
                   }
                 }
               ]
