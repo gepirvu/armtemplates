@@ -8,7 +8,7 @@
     },
     "computeSubnetCidr": {
       "type": "string",
-      "defaultValue": "10.179.3.0/24",
+      "defaultValue": "10.249.19.0/24",
       "metadata": {
         "description": "description"
       }
