@@ -24,21 +24,21 @@
         },
         "vnetCidr": {
             "type": "string",
-            "defaultValue": "10.179.0.0/16",
+            "defaultValue": "10.249.0.0/16",
             "metadata": {
                 "description": "Vnet CIDR"
             }
         },
         "privateSubnetCidr": {
             "type": "string",
-            "defaultValue": "10.179.1.0/24",
+            "defaultValue": "10.249.1.0/24",
             "metadata": {
                 "description": "CIDR range for the private subnet."
             }
         },
         "publicSubnetCidr": {
             "type": "string",
-            "defaultValue": "10.179.2.0/24",
+            "defaultValue": "10.249.2.0/24",
             "metadata": {
                 "description": "CIDR range for the public subnet."
             }
