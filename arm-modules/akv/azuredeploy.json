@@ -65,7 +65,7 @@
                     }
                 },
                 {
-                    "Id": "6daf350c-1cbe-4feb-91ed-5ce7799fcb60", //Giang
+                    "Id": "511dd8b2-1ab4-45d7-bc05-0f5cb492497f", //Liam
                     "Permissions": {
                         "keys": [ "all" ],
                         "secrets": [ "all" ],
