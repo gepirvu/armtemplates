@@ -19,22 +19,22 @@
         },
         "userObjectId": {
             "type": "array",
-            "defaultValue": [
-                {
-                    "Id": "0789cf13-eb1c-4b52-8e7e-6b3e15ef18f1" //George
-                }
-            ],
+           // "defaultValue": [
+           //     {
+           //         "Id": "0789cf13-eb1c-4b52-8e7e-6b3e15ef18f1" //George
+           //     }
+           // ],
             "metadata": {
                 "description": "User principals Objects with permissions."
             }
         },
          "groupObjectId": {
             "type": "array",
-            "defaultValue": [
-                {
-                    "Id": "b902d5d2-e57e-4831-81b4-eca7557c9ca7"
-                }
-            ],
+            //"defaultValue": [
+            //    {
+            //        "Id": "b902d5d2-e57e-4831-81b4-eca7557c9ca7"
+            //    }
+            // ],
             "metadata": {
                 "description": "User principals Objects with permissions."
             }
