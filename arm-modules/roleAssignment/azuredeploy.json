@@ -30,11 +30,11 @@
         },
          "groupObjectId": {
             "type": "array",
-            //"defaultValue": [
-            //    {
-            //        "Id": "b902d5d2-e57e-4831-81b4-eca7557c9ca7"
-            //    }
-            // ],
+            "defaultValue": [
+                {
+                    "Id": "b902d5d2-e57e-4831-81b4-eca7557c9ca7"
+                }
+             ],
             "metadata": {
                 "description": "User principals Objects with permissions."
             }
